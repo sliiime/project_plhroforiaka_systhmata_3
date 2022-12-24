@@ -8,20 +8,73 @@ PartitionManager::PartitionManager(Column *column) {
     this->size = 1;
 }
 
+void* CreateHistogram(void *_args){
+
+    // Detach
+    // pthread_detach(pthread_self());
+
+    HistogramArgs *args = (HistogramArgs*) _args;
+
+    // Create histogram
+    args->histogram = new Histogram(args->size);
+
+    // Count tuples
+    for(int i = 0; i < args->column->num_tuples; i++){
+        int value = args->column->tuples[i].payload;
+        int index = Utils::GetLastBits(value, args->n_bits);
+        args->histogram->data[index].payload++;
+    }
+
+    pthread_exit(NULL);
+}
+
+
 
 void PartitionManager::Reorder(uint n_bits) {
 
     this->size = 1 << n_bits;
 
-    // Create histogram
-    Histogram histogram = Histogram(this->size);
+    // Devide column into THREADS threads
+    int num_threads = THREADS;
+    int num_tuples_per_thread = this->column->num_tuples / num_threads;
+    int num_tuples_last_thread = this->column->num_tuples - (num_tuples_per_thread * (num_threads-1));
 
-    // Count tuples
-    for(int i = 0; i < this->column->num_tuples; i++){
-        int value = column->tuples[i].payload;
-        int index = Utils::GetLastBits(value, n_bits);
-        histogram.data[index].payload++;
+    // Create threads
+    pthread_t thread_ids[num_threads];
+    Histogram histograms[num_threads];
+
+    // Create arguments
+    HistogramArgs args[num_threads];
+    for (int i=0; i<num_threads; i++){
+        args[i].column = this->column;
+        args[i].n_bits = n_bits;
+        args[i].start = i*num_tuples_per_thread;
+        args[i].size = num_tuples_per_thread;
+        args[i].histogram = &histograms[i];
     }
+    
+    // Set last thread to have the remaining tuples
+    args[num_threads-1].size = num_tuples_last_thread;
+
+    // Create threads
+    for (int i=0; i<num_threads; i++){
+        pthread_create(&thread_ids[i], NULL, &CreateHistogram, (void*) &args[i]);
+    }
+
+    // Join threads
+    for (int i=0; i<num_threads; i++){
+        pthread_join(thread_ids[i], NULL);
+    }
+
+    // Merge histograms
+    Histogram histogram = Histogram(this->size);
+    for (int i=0; i<num_threads; i++){
+        for (int j=0; j<histogram.size; j++){
+            histogram.data[j].payload += histograms[i].data[j].payload;
+        }
+    }
+
+    // Create new psum
     
     Histogram *new_psum = new Histogram(histogram.size);
     Tuple *reordered_tuples = new Tuple[column->num_tuples];

@@ -11,7 +11,7 @@ CC = g++
 EXEC = main
 
 # Compile options
-CPPFLAGS = -Wall -g -I $(INCLUDE) -I $(TEMPLATES)
+CPPFLAGS = -pthread -Wall -g -I $(INCLUDE) -I $(TEMPLATES)
 
 # Object files
 SRC = $(wildcard $(MODULES)/*.cpp)
@@ -22,17 +22,17 @@ OBJS = $(EXEC).o $(MODULE_OBJS)
 TMPLTS = $(TEMPLATES)/list.hpp $(TEMPLATES)/vector.hpp $(TEMPLATES)/queue.hpp
 
 $(EXEC): $(OBJS) $(TMPLTS) $(INCLUDE)/config.hpp $(INCLUDE)/parser.hpp $(INCLUDE)/relation.hpp
-	$(CC) $(OBJS) -o $(EXEC)
+	$(CC) $(CPPFLAGS) $(OBJS) -o $(EXEC)
 
-acc_test: acc_test.o $(TMPLTS)
-	$(CC) acc_test.o -o acc_test
+intergration_test: intergration_test.o $(TMPLTS)
+	$(CC) intergration_test.o -o intergration_test
 
 $(MODULE_OBJS): $(BINARIES)/%.o : $(MODULES)/%.cpp
 	mkdir -p $(BINARIES)
 	$(CC) -c $< $(CPPFLAGS) -o $@
   
 clean:
-	rm -f $(BINARIES)/* $(EXEC) $(EXEC).o acc_test output.txt
+	rm -f $(BINARIES)/* $(EXEC) $(EXEC).o intergration_test output.txt
 
 print:
 	echo $(MODULE_OBJS)
@@ -53,5 +53,5 @@ valgrind: $(EXEC)
 save: $(EXEC)
 	./$(EXEC) $(ARGS) > output.txt
 
-test: acc_test
-	./acc_test
+test: intergration_test
+	./intergration_test
