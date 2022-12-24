@@ -21,12 +21,10 @@ int main(){
 
     //Read filenames of relations from stdin
     Utils::readRelations(std::cin,relations);
-    cout << "Relations size: " << relations.get_size() << endl;
     
 	//Reads batch of queries and stores them to queries vector
-    std::ifstream in("workloads/small/small.work");
+    std::ifstream in("workloads/small/custom.work");
 	Utils::readQueryBatch(in,queries);
-    cout << "Queries size: " << queries.get_size() << endl;
 
     // Execute queries
     Vector<Relation*> relationPtrs = Vector<Relation*>();

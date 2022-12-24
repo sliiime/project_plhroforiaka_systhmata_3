@@ -1,7 +1,18 @@
 #pragma once
+#include <pthread.h>
 #include "histogram.hpp"
 #include "column.hpp"
 #include "config.hpp"
+
+struct HistogramArgs {
+    Column *column;
+    uint n_bits;
+    int start;
+    int size;
+    Histogram *histogram;
+};
+
+void *CreateHistogram(void *);
 
 class PartitionManager {
 

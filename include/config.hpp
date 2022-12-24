@@ -4,3 +4,4 @@
 #define PASS2_BITS 16
 
 #define DEBUG 0
+#define THREADS 4

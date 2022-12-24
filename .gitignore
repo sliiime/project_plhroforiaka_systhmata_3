@@ -31,6 +31,8 @@
 *.out
 *.app
 
-#Main
+# Project specific files
 main
+intergration_test
+output.txt
 .vscode
