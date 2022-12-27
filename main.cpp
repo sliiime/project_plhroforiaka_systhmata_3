@@ -13,11 +13,19 @@
 #include <fstream>
 #include <time.h>
 #include "filtering.hpp"
+#include "jsch.hpp"
+#include <pthread.h>
 
 int main(){
 
     Vector<Relation> relations;
     Vector<QueryInfo> queries;
+    jsch::JobScheduler jobScheduler(15);
+
+    std::ofstream out("out.txt");
+    pthread_mutex_t writeMutex;
+    pthread_mutex_init(&writeMutex,NULL);
+
 
     //Read filenames of relations from stdin
     Utils::readRelations(std::cin,relations);
@@ -37,6 +45,22 @@ int main(){
         operationManager->Execute(&queries[i]);
     }
 
+        /*Submit 1000 jobs where each of them is submitting another 1000 jobs*/
+        for (int j = 0 ; j < 1000; j++){
+                jobScheduler.submitJob(jsch::make_job([&]{
+                for (int i = 0 ; i < 1000; i++){
+                    jobScheduler.submitJob(jsch::make_job([&,i]{
+                        pthread_mutex_lock(&writeMutex);
+                            out << pthread_self() << " " << i << std::endl;
+                        pthread_mutex_unlock(&writeMutex);
+                    }));
+                }
+                }));
+        }
+
+
+    jobScheduler.wait();
+    out.close();
     delete operationManager;
 
     return 0;
