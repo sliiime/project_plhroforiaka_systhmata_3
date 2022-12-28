@@ -35,8 +35,6 @@ struct CopyArgs{
     Column *column;
     uint old_n_bits;
     uint new_n_bits;
-    int bucket;
-    int bucket_start;
     int bucket_size;
     Histogram *bucket_count;
     int *bucket_map;
@@ -48,6 +46,7 @@ struct CopyArgs{
 
 void* CopyTuples(void *_args){
 
+
     CopyArgs *args = (CopyArgs*) _args;
 
     // For each tuple in the sub-bucket
@@ -55,16 +54,17 @@ void* CopyTuples(void *_args){
 
         // Explanation in README.md
 
-        int value = args->column->tuples[args->bucket_start+i].payload;
+        int value = args->column->tuples[i].payload;
+        int old_bucket = Utils::GetLastBits(value, args->old_n_bits);
         int sub_bucket = Utils::GetLastBits(value, args->new_n_bits) >> args->old_n_bits;
-        int bucket_bits = args->bucket | (sub_bucket << args->old_n_bits);
+        int bucket_bits = old_bucket | (sub_bucket << args->old_n_bits);
+
 
         // Lock the partition
-        pthread_mutex_lock(&args->locks[sub_bucket]);
-        int index = args->bucket_map[bucket_bits] + args->bucket_count->data[sub_bucket].payload++;
-
-        args->reordered_tuples[index] = args->column->tuples[args->bucket_start+i];
-        pthread_mutex_unlock(&args->locks[sub_bucket]);
+        pthread_mutex_lock(&args->locks[bucket_bits]);
+        int index = args->bucket_map[bucket_bits] + args->bucket_count->data[bucket_bits].payload++;
+        args->reordered_tuples[index] = args->column->tuples[i];
+        pthread_mutex_unlock(&args->locks[bucket_bits]);
     }
 
     pthread_exit(NULL);
@@ -164,60 +164,50 @@ void PartitionManager::Reorder(uint n_bits) {
 
 
     // ========== Reorder tuples ========== //
+    
+    //// Partition Job ////
 
-    // For each old bucket
-    for (int p=0; p < psum->size; p++){
-        int bucket = psum->data[p].key;
-        int bucket_start = psum->data[p].payload;
+    // Count how many values are in each bucket
+    Histogram bucket_count = Histogram(this->size);
 
-        // Count how many values are in each sub-bucket
-        Histogram bucket_count = Histogram(sub_bucket_count);
-
-
-        //// Partition Job ////
-        
-        pthread_mutex_t locks[num_threads];
-        for (int i=0; i<num_threads; i++){
-            pthread_mutex_init(&locks[i], NULL);
-        }
-
-        CopyArgs args[num_threads];
-        for(int i=0; i<num_threads; i++){
-            args[i].column = this->column;                  // [R]  The fill column
-            args[i].bucket_start = bucket_start;            // [R]  Where the bucket starts (should be 0 first time)
-            args[i].bucket = bucket;                        // [R]  The bucket (should be 0 first time bc there is only one bucket)
-            args[i].bucket_count = &bucket_count;           // [R]  The count of tuples moved to each sub-bucket
-            args[i].new_n_bits = n_bits;                    // [R]  The new number of bits
-            args[i].old_n_bits = this->n_bits;              // [R]  The old number of bits
-            args[i].bucket_map = bucket_map;                // [RW] The map of where each sub-bucket starts
-            args[i].reordered_tuples = reordered_tuples;    // [W]  The reordered tuples 
-            args[i].start = i*num_tuples_per_thread;        // [R]  The start of the part that this thread should work on
-            args[i].size = num_tuples_per_thread;           // [R]  The size of the part that this thread should work on
-            args[i].locks = locks;                          // [RW] The locks for each sub-bucket
-        }
-
-        // Set last thread to have the remaining tuples
-        args[num_threads-1].size = num_tuples_last_thread;
-
-        // Set last thread to have the remaining tuples
-        args[num_threads-1].size = num_tuples_last_thread;
-
-        // Create threads
-        for (int i=0; i<num_threads; i++){
-            pthread_create(&thread_ids[i], NULL, &CopyTuples, (void*) &args[i]);
-        }
-
-        // Join threads
-        for (int i=0; i<num_threads; i++){
-            pthread_join(thread_ids[i], NULL);
-        }
-
-        // Destroy locks
-        for (int i=0; i<num_threads; i++){
-            pthread_mutex_destroy(&locks[i]);
-        }
-
+    pthread_mutex_t locks[this->size];
+    for (uint i=0; i<this->size; i++){
+        pthread_mutex_init(&locks[i], NULL);
     }
+
+    CopyArgs copy_args[num_threads];
+    for(int i=0; i<num_threads; i++){
+        copy_args[i].column = this->column;                  // [R]  The fill column
+        copy_args[i].bucket_count = &bucket_count;           // [R]  The count of tuples moved to each sub-bucket
+        copy_args[i].new_n_bits = n_bits;                    // [R]  The new number of bits
+        copy_args[i].old_n_bits = this->n_bits;              // [R]  The old number of bits
+        copy_args[i].bucket_map = bucket_map;                // [RW] The map of where each sub-bucket starts
+        copy_args[i].reordered_tuples = reordered_tuples;    // [W]  The reordered tuples 
+        copy_args[i].start = i*num_tuples_per_thread;        // [R]  The start of the part that this thread should work on
+        copy_args[i].size = num_tuples_per_thread;           // [R]  The size of the part that this thread should work on
+        copy_args[i].locks = locks;                          // [RW] The locks for each sub-bucket
+    }
+    // Set last thread to have the remaining tuples
+    copy_args[num_threads-1].size = num_tuples_last_thread;
+
+
+    // Create threads
+    for (int i=0; i<num_threads; i++){
+        pthread_create(&thread_ids[i], NULL, &CopyTuples, (void*) &copy_args[i]);
+    }
+
+    // Join threads
+    for (int i=0; i<num_threads; i++){
+        pthread_join(thread_ids[i], NULL);
+    }
+
+    // Destroy locks
+    for (uint i=0; i<this->size; i++){
+        pthread_mutex_destroy(&locks[i]);
+    }
+
+
+
 
     // Free memory
     delete psum;
