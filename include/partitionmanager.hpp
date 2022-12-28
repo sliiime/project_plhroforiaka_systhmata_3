@@ -4,16 +4,8 @@
 #include "column.hpp"
 #include "config.hpp"
 
-struct HistogramArgs {
-    Column *column;
-    uint n_bits;
-    int start;
-    int size;
-    Histogram *histogram;
-};
-
 void *CreateHistogram(void *);
-
+void *CopyTuples(void *);
 class PartitionManager {
 
 public:

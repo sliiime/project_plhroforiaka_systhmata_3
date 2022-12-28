@@ -32,36 +32,39 @@ Joint::Joint(Column *c1, Column *c2){
     PartitionManager pm1 = PartitionManager(c1);
     PartitionManager pm2 = PartitionManager(c2);
 
-    bool fitsInMemory = false;
+    // bool fitsInMemory = false;
 
 
     // Check if the partitions fit in L2 cache
-    if (pm1.FitsInMemory(L2_CACHE_BYTES) && pm2.FitsInMemory(L2_CACHE_BYTES)){
-        fitsInMemory = true;
-        // printf("Fits in memory\n");
-    }
+    // if (pm1.FitsInMemory(L2_CACHE_BYTES) && pm2.FitsInMemory(L2_CACHE_BYTES)){
+    //     fitsInMemory = true;
+    //     printf("Fits in memory\n");
+    // }
 
     // Pass 1
-    if (!fitsInMemory){
+    // if (!fitsInMemory){
         pm1.Reorder(PASS1_BITS);
         pm2.Reorder(PASS1_BITS);
-    }
+    // }
 
     // Check if the partitions fit in memory
-    if (!fitsInMemory && pm1.FitsInMemory(L2_CACHE_BYTES) && pm2.FitsInMemory(L2_CACHE_BYTES)){
-        fitsInMemory = true;
-        // printf("Fits in memory after 1 pass\n");
-    }
+    // if (!fitsInMemory && pm1.FitsInMemory(L2_CACHE_BYTES) && pm2.FitsInMemory(L2_CACHE_BYTES)){
+    //     fitsInMemory = true;
+    //     printf("Fits in memory after 1 pass\n");
+    // }
 
     // Pass 2
-    if (!fitsInMemory){
-        pm1.Reorder(PASS2_BITS);
-        pm2.Reorder(PASS2_BITS);
-        // printf("Partitioned two times\n");
-    }
+    // if (!fitsInMemory){
+    //     pm1.Reorder(PASS2_BITS);
+    //     pm2.Reorder(PASS2_BITS);
+    //     printf("Partitioned two times\n");
+    // }
+
+    // pm1.column->PrintBinary();
+    // exit(1);
+
 
     // Iterate over the partitions
-
     for (uint i=0; i<pm1.size; i++){
 
         // Pick the smaller partition to make the Hash Table
