@@ -112,6 +112,8 @@ Joint::Joint(Column *c1, Column *c2, jsch::JobScheduler& jobScheduler){
             S.tuples = NULL;
         }));   
     }
+    jobScheduler.wait();
+    pthread_mutex_destroy(&tupleMutex);
 }
 
 

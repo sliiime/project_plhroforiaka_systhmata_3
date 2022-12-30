@@ -12,5 +12,5 @@ public:
     OperationManager(Vector<Relation *> *relations);
     ~OperationManager();
     void Execute(QueryInfo *queryInfo);
-
+    void Execute(QueryInfo *queryInfo, jsch::JobScheduler& jobScheduler);
 };
