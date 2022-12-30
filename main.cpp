@@ -21,9 +21,7 @@ int main(){
     Vector<Relation> relations;
     Vector<QueryInfo> queries;
 
-    std::ofstream out("out.txt");
-    pthread_mutex_t writeMutex;
-    pthread_mutex_init(&writeMutex,NULL);
+    jsch::JobScheduler jobScheduler(10);
 
 
     //Read filenames of relations from stdin
@@ -39,12 +37,10 @@ int main(){
         relationPtrs.push(&relations[i]);
     }
 
-    OperationManager *operationManager = new OperationManager(&relationPtrs);
+    OperationManager operationManager(&relationPtrs);
     for (uint i = 0 ; i < queries.get_size(); i++){
-        operationManager->Execute(&queries[i]);
+        operationManager.Execute(&queries[i]);
     }
-
-    delete operationManager;
 
     return 0;
 

@@ -12,4 +12,5 @@ public:
     OperationManager(Vector<Relation *> *relations);
     ~OperationManager();
     void Execute(QueryInfo *queryInfo);
+
 };

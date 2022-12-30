@@ -63,8 +63,8 @@ void* CopyTuples(void *_args){
         // Lock the partition
         pthread_mutex_lock(&args->locks[bucket_bits]);
         int index = args->bucket_map[bucket_bits] + args->bucket_count->data[bucket_bits].payload++;
-        args->reordered_tuples[index] = args->column->tuples[i];
         pthread_mutex_unlock(&args->locks[bucket_bits]);
+        args->reordered_tuples[index] = args->column->tuples[i];
     }
 
     pthread_exit(NULL);
