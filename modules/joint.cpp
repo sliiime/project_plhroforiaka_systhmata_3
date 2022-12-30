@@ -27,8 +27,6 @@ void Joint::Print(){
 
 Joint::Joint(Column *c1, Column *c2, jsch::JobScheduler& jobScheduler){
 
-    tuples = new Vector<Tuple>;
-
     // Create Partition Managers
     PartitionManager pm1 = PartitionManager(c1);
     PartitionManager pm2 = PartitionManager(c2);
@@ -59,13 +57,13 @@ Joint::Joint(Column *c1, Column *c2, jsch::JobScheduler& jobScheduler){
     }
 
 
-    pthread_mutex_t tupleMutex;
-    pthread_mutex_init(&tupleMutex,NULL);
-
+    Vector<Tuple> workerTuples[pm1.size];
     // Iterate over the partitions
     for (uint i=0; i<pm1.size; i++){
         jobScheduler.submitJob(jsch::make_job([&,i]{
             // Pick the smaller partition to make the Hash Table
+            uint workerId = i;
+
             bool swapped = false;
             Column *smaller, *larger;
             Column R = pm1.GetPartition(i);
@@ -100,11 +98,8 @@ Joint::Joint(Column *c1, Column *c2, jsch::JobScheduler& jobScheduler){
                     // Add tuples to result
                     Tuple t;
                     if (swapped) t = Tuple(key, values->get(j));
-                    else         t = Tuple(values->get(j), key);
-
-                    pthread_mutex_lock(&tupleMutex);
-                        this->AddTuple(t);
-                    pthread_mutex_unlock(&tupleMutex);
+                    else         t = Tuple(values->get(j), key);                    
+                    workerTuples[workerId].push(t);
                 }
             }
             // Set tuples to null so the destructor doesn't delete them
@@ -113,7 +108,18 @@ Joint::Joint(Column *c1, Column *c2, jsch::JobScheduler& jobScheduler){
         }));   
     }
     jobScheduler.wait();
-    pthread_mutex_destroy(&tupleMutex);
+
+    //Calculate total number of tuples, so vector doesn't have to resize 
+    uint totalTuples = 0;
+    for (uint i = 0 ; i < pm1.size; i++) totalTuples += workerTuples[i].get_size();
+
+    //Initialize tuples Vector
+    this->tuples = new Vector<Tuple>(totalTuples);
+
+    //Merging tuples of each worker
+    for (uint i = 0 ; i < pm1.size; i++){
+        for (uint j = 0 ; j < workerTuples[i].get_size(); j++) this->AddTuple(workerTuples[i][j]);
+    }
 }
 
 
