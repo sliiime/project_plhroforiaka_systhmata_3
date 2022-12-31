@@ -1,0 +1,9 @@
+----Benchmarks-----
+
+
+[MS]    <--- [Description]
+
+6848391 <--- All join workers write add tuples to the same Vector
+2889349 <--- Each join worker users its own Tuple Vector and then Vectors are merged into one. Tuple Vector resizes
+2765102 <--- Each join worker users its own Tuple Vector and then Vectors are merged into one. Tuple Vector doesn't resize
+2764739 <--- Single Thread

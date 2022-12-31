@@ -15,22 +15,23 @@
 #include "filtering.hpp"
 #include "jsch.hpp"
 #include <pthread.h>
+#include <chrono>
+
+#define BENCHMARK
 
 int main(){
 
     Vector<Relation> relations;
     Vector<QueryInfo> queries;
 
-    std::ofstream out("out.txt");
-    pthread_mutex_t writeMutex;
-    pthread_mutex_init(&writeMutex,NULL);
+    jsch::JobScheduler jobScheduler(10);
 
 
     //Read filenames of relations from stdin
     Utils::readRelations(std::cin,relations);
     
 	//Reads batch of queries and stores them to queries vector
-    std::ifstream in("workloads/small/custom.work");
+    std::ifstream in("workloads/small/all.work");
 	Utils::readQueryBatch(in,queries);
 
     // Execute queries
@@ -39,12 +40,27 @@ int main(){
         relationPtrs.push(&relations[i]);
     }
 
-    OperationManager *operationManager = new OperationManager(&relationPtrs);
+    auto start = chrono::high_resolution_clock::now();
+    OperationManager operationManager(&relationPtrs);
     for (uint i = 0 ; i < queries.get_size(); i++){
-        operationManager->Execute(&queries[i]);
+        operationManager.Execute(&queries[i],jobScheduler);
     }
+    auto end = chrono::high_resolution_clock::now();
 
-    delete operationManager;
+    auto duration = chrono::duration_cast<chrono::microseconds>(end - start);
+    std::cout << "Queries with JobScheduler : " << duration.count() << std::endl;
+
+    #ifdef BENCHMARK
+        start = chrono::high_resolution_clock::now();
+        OperationManager operationManager2(&relationPtrs);
+        for (uint i = 0 ; i < queries.get_size(); i++){
+            operationManager2.Execute(&queries[i]);
+        }
+        end = chrono::high_resolution_clock::now();
+
+        duration = chrono::duration_cast<chrono::microseconds>(end - start);
+        std::cout << "Queries without JobScheduler : " << duration.count() << std::endl;
+    #endif
 
     return 0;
 
