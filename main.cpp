@@ -16,6 +16,7 @@
 #include "jsch.hpp"
 #include <pthread.h>
 #include <chrono>
+#include "optimizer.hpp"
 
 #define BENCHMARK
 
@@ -31,15 +32,25 @@ int main(){
     Utils::readRelations(std::cin,relations);
     
 	//Reads batch of queries and stores them to queries vector
-    std::ifstream in("workloads/small/all.work");
+    std::ifstream in("workloads/small/small.work");
 	Utils::readQueryBatch(in,queries);
 
-    // Execute queries
+    // Create pointers to relations
     Vector<Relation*> relationPtrs = Vector<Relation*>();
     for (uint i = 0 ; i < relations.get_size(); i++){
         relationPtrs.push(&relations[i]);
     }
 
+    // Optimize query order
+    Optimizer optimizer(&relationPtrs);
+
+    optimizer.Optimize();
+
+
+
+    return 0;
+
+    // Execute queries
     auto start = chrono::high_resolution_clock::now();
     OperationManager operationManager(&relationPtrs);
     for (uint i = 0 ; i < queries.get_size(); i++){
