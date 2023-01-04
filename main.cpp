@@ -42,11 +42,9 @@ int main(){
     }
 
     // Optimize query order
-    Optimizer optimizer(&relationPtrs);
+    Optimizer optimizer(&relationPtrs, &queries);
 
     optimizer.Optimize();
-
-
 
     return 0;
 

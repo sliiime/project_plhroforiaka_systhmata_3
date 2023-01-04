@@ -1,7 +1,9 @@
 #pragma once
+#include <cmath>
 #include "relation.hpp"
 #include "vector.hpp"
 #include "config.hpp"
+#include "parser.hpp"
 
 struct ColumnStatistics{
     int lowerBound;
@@ -9,7 +11,6 @@ struct ColumnStatistics{
     int totalValues;
     int distinctValues;
 };
-
 
 class RelationStatistics{
 private:
@@ -19,22 +20,45 @@ private:
     int columnCount;
 
 public:
+    // Constructor that creates statistics for a relation
     RelationStatistics(Relation *relation);
+
+    // Constructor that copies statistics from another relation statistics object
+    RelationStatistics(RelationStatistics *rs);
+
+    // Empty constructor
+    RelationStatistics(){};
+
     int LowerBound(int column);
     int UpperBound(int column);
     int TotalValues(int column);
     int DistinctValues(int column);
+
+    void LowerBound(int column, int value);
+    void UpperBound(int column, int value);
+    void TotalValues(int column, int value);
+    void DistinctValues(int column, int value);
+
+    int RowCount();
+    int ColumnCount();
+
     void Print();
 };
 
 class Optimizer{
 
-    struct Statistics;
-
 private:
     Vector<Relation *> *relations;
+    Vector<QueryInfo> *queries;
+    Vector<RelationStatistics> relationStats;
+    Vector< Vector<RelationStatistics> > queryStats;
+
+    void OptimizeFilterEqual(int relationId, int column, int value);
+    void OptimizeFilterLessGreater(int relationId, int column, int value, bool less);
 
 public:
-    Optimizer(Vector<Relation*> *relations);
+    Optimizer(Vector<Relation*> *relations, Vector<QueryInfo> *queries);
+    ~Optimizer();
     void Optimize();
+    // void Print(); // TODO [Medium] : Print function for optimizer
 };

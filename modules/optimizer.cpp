@@ -1,6 +1,5 @@
 #include "optimizer.hpp"
 
-
 RelationStatistics::RelationStatistics(Relation* relation){
     this->relation = relation;
     rowCount = relation->row_count();
@@ -59,6 +58,12 @@ RelationStatistics::RelationStatistics(Relation* relation){
     
 }
 
+RelationStatistics::RelationStatistics(RelationStatistics *rs){
+    this->relation = rs->relation;
+    this->rowCount = rs->rowCount;
+    this->columnCount = rs->columnCount;
+    this->stats = rs->stats;
+}
 
 int RelationStatistics::LowerBound(int column){
     return stats[column].lowerBound;
@@ -76,6 +81,29 @@ int RelationStatistics::TotalValues(int column){
     return stats[column].totalValues;
 }
 
+void RelationStatistics::LowerBound(int column, int value){
+    stats[column].lowerBound = value;
+}
+
+void RelationStatistics::UpperBound(int column, int value){
+    stats[column].upperBound = value;
+}
+
+void RelationStatistics::DistinctValues(int column, int value){
+    stats[column].distinctValues = value;
+}
+
+void RelationStatistics::TotalValues(int column, int value){
+    stats[column].totalValues = value;
+}
+
+int RelationStatistics::RowCount(){
+    return rowCount;
+}
+
+int RelationStatistics::ColumnCount(){
+    return columnCount;
+}
 
 void RelationStatistics::Print(){
     std::cout << "Relation Statistics" << std::endl;
@@ -92,21 +120,91 @@ void RelationStatistics::Print(){
     std::cout << std::endl;
 }
 
+void Optimizer::OptimizeFilterEqual(int relationId, int column, int value){
 
-Optimizer::Optimizer(Vector<Relation*> *relations){
-    this->relations = relations;
+    // RelationStatistics rs = RelationStatistics(relations->get(relationId)); // TODO [Critical] Change this to use the relation statistics from the optimizer
+
+    // // Calculate new statistics for column
+    // int A_lowerBound = value;
+    // int A_upperBound = value;
+    // int A_distinctValues = 1;
+    // int A_totalValues;
+
+    // if (relations->get(relationId)->columns[column].contains(value)){
+    //     int A_totalValues = rs.TotalValues(column) / rs.DistinctValues(column);
+    // } else {
+    //     int A_totalValues = 0;
+    // }
+
+
+
+    // // Caclulate new statistics for other columns
+    // for (int i=0; i< rs.ColumnCount(); i++){
+    //     if (i == column) continue;
+
+    //     int dA = rs.DistinctValues(column);
+    //     int dC = rs.DistinctValues(i);
+    //     int fA = rs.TotalValues(column);
+    //     int fC = rs.TotalValues(i);
+    //     int fA_new = A_totalValues;
+
+    //     int C_distinctValues = dC * (1 - pow((1 - fA_new / fA), fC/dC) );
+    //     int C_totalValues = fA_new;
+
+    //     rs.DistinctValues(i, C_distinctValues);
+    //     rs.TotalValues(i, C_totalValues);
+    // }
+
+
+    
+    // // Update statistics of column
+    // rs.LowerBound(column, A_lowerBound);
+    // rs.UpperBound(column, A_upperBound);
+    // rs.DistinctValues(column, A_distinctValues);
+    // rs.TotalValues(column, A_totalValues);
+
 }
 
+Optimizer::Optimizer(Vector<Relation*> *relations, Vector<QueryInfo> *queries){
+    this->relations = relations;
+    this->queries = queries;
+}
+
+Optimizer::~Optimizer(){
+    // TODO [Critical] Free memory
+}
 
 
 void Optimizer::Optimize(){
 
     // Calculate statistics for each relation
     for(uint i = 0; i < relations->get_size(); i++){
-        RelationStatistics relationStatistics(relations->get(i));
+        RelationStatistics rs = RelationStatistics(relations->get(i));
+        relationStats.push(rs);
     }
 
-    
+    //// Optimize each query
+
+
+    // Initialize query statistics
+    for (uint i=0; i<queries->get_size(); i++){
+        Vector<RelationStatistics> queryStatistics;
+
+        // Get query
+        QueryInfo queryInfo = queries->get(i);
+        
+        // Add relation statistics to query
+        Vector<unsigned> *relationIds = &(queryInfo.relationIds);
+        for (uint i = 0; i < relationIds->get_size(); i++){
+            RelationId relationId = relationIds->get(i);
+            RelationStatistics rs = RelationStatistics(relationStats.get(relationId));
+            queryStatistics.push(rs);
+        }
+        
+        // Add query statistics to vector
+        queryStats.push(queryStatistics);
+
+    }
 
 
 }
