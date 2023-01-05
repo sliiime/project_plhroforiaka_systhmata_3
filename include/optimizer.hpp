@@ -41,6 +41,7 @@ public:
 
     int RowCount();
     int ColumnCount();
+    Relation* GetRelation();
 
     void Print();
 };
@@ -49,15 +50,15 @@ class Optimizer{
 
 private:
     Vector<Relation *> *relations;
-    Vector<QueryInfo> *queries;
-    Vector<RelationStatistics> relationStats;
-    Vector< Vector<RelationStatistics> > queryStats;
+    Vector<QueryInfo *> *queries;
+    Vector<RelationStatistics> allRelationStats;
+    Vector< Vector<RelationStatistics> > allQueryStats;
 
-    void OptimizeFilterEqual(int relationId, int column, int value);
-    void OptimizeFilterLessGreater(int relationId, int column, int value, bool less);
+    void OptimizeFilterEqual(RelationStatistics &rs, int column, int value);
+    void OptimizeFilterLessGreater(RelationStatistics &rs, int column, int value, bool less);
 
 public:
-    Optimizer(Vector<Relation*> *relations, Vector<QueryInfo> *queries);
+    Optimizer(Vector<Relation*> *relations, Vector<QueryInfo *> *queries);
     ~Optimizer();
     void Optimize();
     // void Print(); // TODO [Medium] : Print function for optimizer

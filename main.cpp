@@ -41,8 +41,15 @@ int main(){
         relationPtrs.push(&relations[i]);
     }
 
+    // Create pointers to relations
+    Vector<QueryInfo*> queryPtrs = Vector<QueryInfo*>();
+    for (uint i = 0 ; i < queries.get_size(); i++){
+        queryPtrs.push(&queries[i]);
+    }
+
     // Optimize query order
-    Optimizer optimizer(&relationPtrs, &queries);
+
+    Optimizer optimizer(&relationPtrs, &queryPtrs);
 
     optimizer.Optimize();
 
