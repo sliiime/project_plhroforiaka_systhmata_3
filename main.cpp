@@ -17,7 +17,7 @@
 #include <pthread.h>
 #include <chrono>
 
-#define BENCHMARK
+// #define BENCHMARK
 
 int main(){
 

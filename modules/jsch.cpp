@@ -9,7 +9,7 @@ void* jsch::JobScheduler::work(){
         /* blocks */
         Job* job;
         if (queue.pop(job) == success){
-
+            /* Pops -> Queue is empty , worker is idle -> Bad */
             active[id] = true;
             job->execute();
             completed[id]++;
@@ -18,6 +18,7 @@ void* jsch::JobScheduler::work(){
             delete job;
         }
 
+        /*Every time a worker finishes its job, it notifies the waiter,if one exists that the queue is empty*/
         if (queue.empty() && _waitEnabled ){
             pthread_mutex_lock(&waitMutex);
                 pthread_cond_broadcast(&waitCond);
@@ -31,8 +32,9 @@ void* jsch::JobScheduler::work(){
 void jsch::JobScheduler::wait(){
     _waitEnabled = true;
     pthread_mutex_lock(&waitMutex);
-        while (!queue.empty() || !onVacation()) pthread_cond_wait(&waitCond,&waitMutex);
+        while (!queue.empty() || !onVacation() || jobsCompleted() != submitted ) {pthread_cond_wait(&waitCond,&waitMutex);}
     pthread_mutex_unlock(&waitMutex);
+    _waitEnabled = false;
 }
 
 void jsch::JobScheduler::block(){
@@ -68,12 +70,22 @@ jsch::JobScheduler::JobScheduler(size_t workersCount): queue(ccqueue<Job*>()),to
 }
 
 void jsch::JobScheduler::submitJob(Job* job){ 
-    if (!_blocked && !_stopped) queue.push(job);
+    if (!_blocked && !_stopped) {
+        submitted++;
+        queue.push(job);
+    }
     else delete job;
 }
 
 size_t jsch::JobScheduler::workersCount() const {
     return total;
+}
+
+size_t jsch::JobScheduler::jobsCompleted() const {
+    size_t jobsCompleted = 0;
+    for (int i = 0 ; i < total; i++) jobsCompleted += completed[i];
+    
+    return jobsCompleted;
 }
 
 jsch::JobScheduler::~JobScheduler(){

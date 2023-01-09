@@ -52,11 +52,13 @@ namespace jsch{
 
             private:
                 
+                size_t submitted;
                 /*Jobs completed by workers */
                 size_t* completed;
                 ccqueue<Job*> queue;
                 pthread_t* workers;
                 size_t total;
+
                 /*Workers that are currently executing a job*/
                 bool* active;
                 /*Tells workers to quit */
@@ -74,6 +76,7 @@ namespace jsch{
                 bool onVacation() const;
                 /*Used by worker to find its serialId*/
                 size_t selfSerialId() const;
+                size_t jobsCompleted() const;
                 
 
             public:

@@ -15,6 +15,7 @@ struct HistogramArgs {
     int start;
     int size;
     Histogram *histogram;
+
 };
 
 void CreateHistogram(HistogramArgs* args){    
@@ -213,10 +214,10 @@ void PartitionManager::Reorder(uint n_bits,jsch::JobScheduler& jobScheduler) {
 
     // Create threads
     Histogram *histograms[num_threads];
-    for (int i=0; i<num_threads; i++){
+    for (int i=0; i < num_threads; i++){
         histograms[i] = new Histogram(this->size);
     }
-
+    
     // Create arguments
     HistogramArgs args[num_threads];
     for (int i=0; i<num_threads; i++){
@@ -227,18 +228,19 @@ void PartitionManager::Reorder(uint n_bits,jsch::JobScheduler& jobScheduler) {
         args[i].histogram = histograms[i];          // [W] Histogram to write to
     }
     
-    // Set last thread to have the remaining tuples
+    //Set last thread to have the remaining tuples
     args[num_threads-1].size = num_tuples_last_thread;
-
+    
     for (int i = 0 ; i < num_threads; i++){
         jobScheduler.submitJob(jsch::make_job(
-            [&]{
-                CreateHistogram(args);
+            [&,i] {
+                CreateHistogram(&args[i]);
             }
         ));
     }
 
     jobScheduler.wait();
+
 
     // Merge histograms
     Histogram histogram = Histogram(this->size);
@@ -320,13 +322,14 @@ void PartitionManager::Reorder(uint n_bits,jsch::JobScheduler& jobScheduler) {
     // Create threads
     for (int i=0; i<num_threads; i++){
         jobScheduler.submitJob(jsch::make_job(
-            [&]{
-                CopyTuples(copy_args);
+            [&,i]{
+                CopyTuples(&copy_args[i]);
             }
         ));
     }
 
     jobScheduler.wait();
+
 
     // Destroy locks
     for (uint i=0; i<this->size; i++){
