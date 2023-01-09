@@ -3,9 +3,8 @@
 #include "histogram.hpp"
 #include "column.hpp"
 #include "config.hpp"
+#include "jsch.hpp"
 
-void *CreateHistogram(void *);
-void *CopyTuples(void *);
 class PartitionManager {
 
 public:
@@ -27,6 +26,8 @@ public:
     @return a pointer to the reordered column
     */
     void Reorder(uint);
+
+    void Reorder(uint,jsch::JobScheduler&);
 
     /*
     Frees the memory allocated for a partition

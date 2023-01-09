@@ -84,6 +84,7 @@ namespace jsch{
                 void wait();
                 void block();
                 void submitJob(Job* job);
+                size_t workersCount() const;
 
                 
                 

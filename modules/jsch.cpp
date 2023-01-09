@@ -72,6 +72,10 @@ void jsch::JobScheduler::submitJob(Job* job){
     else delete job;
 }
 
+size_t jsch::JobScheduler::workersCount() const {
+    return total;
+}
+
 jsch::JobScheduler::~JobScheduler(){
 
     /*Workers must terminate*/
