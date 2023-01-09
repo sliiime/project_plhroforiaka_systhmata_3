@@ -59,7 +59,6 @@ void CopyTuples(CopyArgs* args){
         pthread_mutex_unlock(&args->locks[bucket_bits]);
         args->reordered_tuples[index] = args->column->tuples[i];
     }
-
 }
 
 
@@ -76,7 +75,6 @@ void PartitionManager::Reorder(uint n_bits) {
     int num_tuples_last_thread = this->column->num_tuples - (num_tuples_per_thread * (num_threads-1));
 
     // Create threads
-    pthread_t thread_ids[num_threads];
     Histogram *histograms[num_threads];
     for (int i=0; i<num_threads; i++){
         histograms[i] = new Histogram(this->size);
@@ -95,15 +93,10 @@ void PartitionManager::Reorder(uint n_bits) {
     // Set last thread to have the remaining tuples
     args[num_threads-1].size = num_tuples_last_thread;
 
-    // Create threads
-    for (int i=0; i<num_threads; i++){
-        pthread_create(&thread_ids[i], NULL, &CreateHistogram, (void*) &args[i]);
-    }
+    // Single Threaded Version
+    for (int i=0; i<num_threads; i++) CreateHistogram(args+i);
+    
 
-    // Join threads
-    for (int i=0; i<num_threads; i++){
-        pthread_join(thread_ids[i], NULL);
-    }
 
     // Merge histograms
     Histogram histogram = Histogram(this->size);
@@ -183,14 +176,7 @@ void PartitionManager::Reorder(uint n_bits) {
 
 
     // Create threads
-    for (int i=0; i<num_threads; i++){
-        pthread_create(&thread_ids[i], NULL, &CopyTuples, (void*) &copy_args[i]);
-    }
-
-    // Join threads
-    for (int i=0; i<num_threads; i++){
-        pthread_join(thread_ids[i], NULL);
-    }
+    for (int i=0; i<num_threads; i++) CopyTuples(copy_args);
 
     // Destroy locks
     for (uint i=0; i<this->size; i++){
