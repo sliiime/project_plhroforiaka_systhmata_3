@@ -231,106 +231,142 @@ void PartitionManager::Reorder(uint n_bits,jsch::JobScheduler& jobScheduler) {
     //Set last thread to have the remaining tuples
     args[num_threads-1].size = num_tuples_last_thread;
     
-    for (int i = 0 ; i < num_threads; i++){
-        jobScheduler.submitJob(jsch::make_job(
+    auto job1 = jsch::make_job(
+        [&]{
+            std::cout << "Ftiaxnw istogramma,des me " << std::endl;
+            CreateHistogram(&args[0]);
+        }
+    );
+
+    jsch::JobScheduler::JobSequence* jobSequence = jobScheduler.makeJobSequence(job1);
+
+    for (int i = 1 ; i < num_threads; i++){
+        jobSequence->then(jsch::make_job(
             [&,i] {
                 CreateHistogram(&args[i]);
             }
         ));
     }
-
-    jobScheduler.wait();
-
-
-    // Merge histograms
+            
+    //Create new psum
+    
     Histogram histogram = Histogram(this->size);
-    for (int i=0; i<num_threads; i++){
-        for (int j=0; j<histogram.size; j++){
-            histogram.data[j].payload += histograms[i]->data[j].payload;
-        }
-        delete histograms[i];
-    }
+    Histogram *new_psum;
+    Tuple *reordered_tuples;
+    int *bucket_map;
+    Histogram bucket_count;
+    pthread_mutex_t locks[this->size];
+    int sub_bucket_count;
+    CopyArgs copy_args[num_threads];
 
-    // Create new psum
-    
-    Histogram *new_psum = new Histogram(histogram.size);
-    Tuple *reordered_tuples = new Tuple[column->num_tuples];
 
-    int sub_bucket_count = 1 << (n_bits - this->n_bits);
-    
-    // ========== Create new psum by dividing bucket ========== //
-
-    // Key (last n_bits)
-    for (int p=0; p < psum->size; p++){
-        int bucket = psum->data[p].key;
-
-        for (int i=0; i < sub_bucket_count; i++){
-            int new_key = bucket | (i << this->n_bits);
-            int index = p*sub_bucket_count+i;
-
-            new_psum->data[index].key = new_key;
-        }
-    }
-
-    max_bucket_size = histogram.GetMax();
-
-    // Value (pointer to the first tuple in the bucket)
-    for (int i=0; i < new_psum->size; i++){
-            if (i == 0){
-                new_psum->data[i].payload = 0;
-            } else {
-                int prev_key = new_psum->data[i-1].key;
-                new_psum->data[i].payload = histogram.data[prev_key].payload + new_psum->data[i-1].payload;
+    auto job2 = jsch::make_job(
+        [&]{
+            // Merge histograms
+            for (int i=0; i<num_threads; i++){
+                for (int j=0; j<histogram.size; j++){
+                    histogram.data[j].payload += histograms[i]->data[j].payload;
+                }
+                delete histograms[i];
             }
-    }
 
-    // Create new bucket map
-    int *bucket_map = new int[new_psum->size];
-    for (int i=0; i < new_psum->size; i++){
-        bucket_map[i] = new_psum->data[new_psum->data[i].key].payload;
-    }
+            new_psum = new Histogram(histogram.size);
+            reordered_tuples = new Tuple[column->num_tuples];
+            sub_bucket_count = 1 << (n_bits - this->n_bits);
+            // ========== Create new psum by dividing bucket ========== //
+
+            // Key (last n_bits)
+            for (int p=0; p < psum->size; p++){
+                int bucket = psum->data[p].key;
+
+                for (int i=0; i < sub_bucket_count; i++){
+                    int new_key = bucket | (i << this->n_bits);
+                    int index = p*sub_bucket_count+i;
+
+                    new_psum->data[index].key = new_key;
+                }
+            }
+
+            max_bucket_size = histogram.GetMax();
+
+            // Value (pointer to the first tuple in the bucket)
+            for (int i=0; i < new_psum->size; i++){
+                    if (i == 0){
+                        new_psum->data[i].payload = 0;
+                    } else {
+                        int prev_key = new_psum->data[i-1].key;
+                        new_psum->data[i].payload = histogram.data[prev_key].payload + new_psum->data[i-1].payload;
+                    }
+            }
+
+            // Create new bucket map
+            bucket_map = new int[new_psum->size];
+
+            for (int i=0; i < new_psum->size; i++){
+                bucket_map[i] = new_psum->data[new_psum->data[i].key].payload;
+            }
+            // Count how many values are in each bucket
+            bucket_count = Histogram(this->size);
+            for (uint i=0; i<this->size; i++){
+                pthread_mutex_init(&locks[i], NULL);
+            }
+            
+            for(int i=0; i<num_threads; i++){
+                copy_args[i].column = this->column;                  // [R]  The fill column
+                copy_args[i].bucket_count = &bucket_count;           // [R]  The count of tuples moved to each sub-bucket
+                copy_args[i].new_n_bits = n_bits;                    // [R]  The new number of bits
+                copy_args[i].old_n_bits = this->n_bits;              // [R]  The old number of bits
+                copy_args[i].bucket_map = bucket_map;                // [RW] The map of where each sub-bucket starts
+                copy_args[i].reordered_tuples = reordered_tuples;    // [W]  The reordered tuples 
+                copy_args[i].start = i*num_tuples_per_thread;        // [R]  The start of the part that this thread should work on
+                copy_args[i].size = num_tuples_per_thread;           // [R]  The size of the part that this thread should work on
+                copy_args[i].locks = locks;                          // [RW] The locks for each sub-bucket
+            }
+            // Set last thread to have the remaining tuples
+            copy_args[num_threads-1].size = num_tuples_last_thread;
+            std::cout << "reordered_tuples " << reordered_tuples << std::endl;
+            std::cout << "bucket_map " << bucket_map << std::endl;
+
+        }
+    );
+
+
+
+    
+
+
+    jobSequence->then(job2);
+    
+
+
+    
+
 
 
     // ========== Reorder tuples ========== //
     
     //// Partition Job ////
 
-    // Count how many values are in each bucket
-    Histogram bucket_count = Histogram(this->size);
+    
 
-    pthread_mutex_t locks[this->size];
-    for (uint i=0; i<this->size; i++){
-        pthread_mutex_init(&locks[i], NULL);
-    }
 
-    CopyArgs copy_args[num_threads];
-    for(int i=0; i<num_threads; i++){
-        copy_args[i].column = this->column;                  // [R]  The fill column
-        copy_args[i].bucket_count = &bucket_count;           // [R]  The count of tuples moved to each sub-bucket
-        copy_args[i].new_n_bits = n_bits;                    // [R]  The new number of bits
-        copy_args[i].old_n_bits = this->n_bits;              // [R]  The old number of bits
-        copy_args[i].bucket_map = bucket_map;                // [RW] The map of where each sub-bucket starts
-        copy_args[i].reordered_tuples = reordered_tuples;    // [W]  The reordered tuples 
-        copy_args[i].start = i*num_tuples_per_thread;        // [R]  The start of the part that this thread should work on
-        copy_args[i].size = num_tuples_per_thread;           // [R]  The size of the part that this thread should work on
-        copy_args[i].locks = locks;                          // [RW] The locks for each sub-bucket
-    }
-    // Set last thread to have the remaining tuples
-    copy_args[num_threads-1].size = num_tuples_last_thread;
+
 
 
     // Create threads
     for (int i=0; i<num_threads; i++){
-        jobScheduler.submitJob(jsch::make_job(
+        jobSequence->then(jsch::make_job(
             [&,i]{
+                std::cout << "kanw to copy me ari8mo " << i << std::endl;
                 CopyTuples(&copy_args[i]);
             }
         ));
     }
 
+    jobScheduler.submitJob(jobSequence);
     jobScheduler.wait();
 
-
+    std::cout << "Stamathsa na perimenw :O" << std::endl; 
     // Destroy locks
     for (uint i=0; i<this->size; i++){
         pthread_mutex_destroy(&locks[i]);
@@ -350,6 +386,7 @@ void PartitionManager::Reorder(uint n_bits,jsch::JobScheduler& jobScheduler) {
     // Update column
     delete[] column->tuples;
     column->tuples = reordered_tuples;
+    
     
 }
 
