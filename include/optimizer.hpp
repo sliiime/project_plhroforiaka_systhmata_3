@@ -6,10 +6,10 @@
 #include "parser.hpp"
 
 struct ColumnStatistics{
-    int lowerBound;
-    int upperBound;
-    int totalValues;
-    int distinctValues;
+    double lowerBound;
+    double upperBound;
+    double totalValues;
+    double distinctValues;
 };
 
 class RelationStatistics{
@@ -26,18 +26,21 @@ public:
     // Constructor that copies statistics from another relation statistics object
     RelationStatistics(RelationStatistics *rs);
 
+    // Create stats concatenating two other stats
+    RelationStatistics(RelationStatistics *rs1, RelationStatistics *rs2);
+
     // Empty constructor
     RelationStatistics(){};
 
-    int LowerBound(int column);
-    int UpperBound(int column);
-    int TotalValues(int column);
-    int DistinctValues(int column);
+    double LowerBound(int column);
+    double UpperBound(int column);
+    double TotalValues(int column);
+    double DistinctValues(int column);
 
-    void LowerBound(int column, int value);
-    void UpperBound(int column, int value);
-    void TotalValues(int column, int value);
-    void DistinctValues(int column, int value);
+    void LowerBound(int column, double value);
+    void UpperBound(int column, double value);
+    void TotalValues(int column, double value);
+    void DistinctValues(int column, double value);
 
     int RowCount();
     int ColumnCount();
@@ -46,16 +49,36 @@ public:
     void Print();
 };
 
+class BestTree{
+
+private:
+    Vector<RelationStatistics*> stats;
+    Vector<Vector<uint>> orderedIDs;
+    int hash(Vector<uint> relationIDs);
+
+public:
+    Vector<uint> GetBestTree(Vector<uint> orderedIDs);
+    void Initialize(int joinID, RelationStatistics *relStats);
+    void SetBestTree(Vector<uint> relationIDs, Vector<uint> orderedIDs);
+    static Vector<Vector<uint>> GetCombinations(Vector<uint> ids, int n);
+    RelationStatistics *GetStats(Vector<uint> relationIDs);
+    double GetCost(Vector<uint> relationIDs);
+    void SetStats(Vector<uint> joinIDs, RelationStatistics *relStats);
+
+};
+
 class Optimizer{
 
 private:
     Vector<Relation *> *relations;
     Vector<QueryInfo *> *queries;
-    Vector<RelationStatistics> allRelationStats;
-    Vector< Vector<RelationStatistics> > allQueryStats;
+    Vector<RelationStatistics *> *allRelationStats;
+    Vector< Vector<RelationStatistics*> *> *allQueryStats;
 
-    void OptimizeFilterEqual(RelationStatistics &rs, int column, int value);
-    void OptimizeFilterLessGreater(RelationStatistics &rs, int column, int value, bool less);
+    void OptimizeFilterEqual(RelationStatistics *rs, int column, double value);
+    RelationStatistics OptimizeFilterLessGreater(RelationStatistics *rs, int column, double value, bool less, bool inplace);
+    void OptimizeSelfJoin(RelationStatistics *rs, int column1, int column2);
+    RelationStatistics *OptimizeJoin(RelationStatistics *rs1, RelationStatistics *rs2, int column1, int column2);
 
 public:
     Optimizer(Vector<Relation*> *relations, Vector<QueryInfo *> *queries);

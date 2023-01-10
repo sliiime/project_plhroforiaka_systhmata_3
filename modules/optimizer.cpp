@@ -33,7 +33,7 @@ RelationStatistics::RelationStatistics(Relation* relation){
         // Update distinct values
 
         int max_array_length = MAX_BOOL_ARRAY_LENGTH;
-        int array_length = std::min(max_array_length, columnStatistics.upperBound - columnStatistics.lowerBound + 1);
+        int array_length = std::min(max_array_length, int(columnStatistics.upperBound - columnStatistics.lowerBound + 1));
 
         Vector<bool> distinctValues = Vector<bool>(array_length);
 
@@ -45,7 +45,7 @@ RelationStatistics::RelationStatistics(Relation* relation){
         // Iterate through all rows
         for (int i=0; i<rowCount; i++){
             int value = relation->get(i,col);
-            int index = (value - columnStatistics.lowerBound) % array_length;
+            int index = int(value - columnStatistics.lowerBound) % array_length;
             distinctValues.set(index, true);
         }
 
@@ -68,28 +68,39 @@ RelationStatistics::RelationStatistics(RelationStatistics *rs){
     this->stats = rs->stats;
 }
 
-int RelationStatistics::LowerBound(int column){
+RelationStatistics::RelationStatistics(RelationStatistics *rs1, RelationStatistics *rs2){
+    this->relation = NULL;
+    this->rowCount = rs1->rowCount;
+    this->columnCount = rs1->columnCount + rs2->columnCount;
+    this->stats = rs1->stats;
+    for (int i=0; i<rs2->columnCount; i++){
+        this->stats.push(rs2->stats[i]);
+    }
+}
+
+
+double RelationStatistics::LowerBound(int column){
     return stats[column].lowerBound;
 }
-int RelationStatistics::UpperBound(int column){
+double RelationStatistics::UpperBound(int column){
     return stats[column].upperBound;
 }
-int RelationStatistics::DistinctValues(int column){
+double RelationStatistics::DistinctValues(int column){
     return stats[column].distinctValues;
 }
-int RelationStatistics::TotalValues(int column){
+double RelationStatistics::TotalValues(int column){
     return stats[column].totalValues;
 }
-void RelationStatistics::LowerBound(int column, int value){
+void RelationStatistics::LowerBound(int column, double value){
     stats[column].lowerBound = value;
 }
-void RelationStatistics::UpperBound(int column, int value){
+void RelationStatistics::UpperBound(int column, double value){
     stats[column].upperBound = value;
 }
-void RelationStatistics::DistinctValues(int column, int value){
+void RelationStatistics::DistinctValues(int column, double value){
     stats[column].distinctValues = value;
 }
-void RelationStatistics::TotalValues(int column, int value){
+void RelationStatistics::TotalValues(int column, double value){
     stats[column].totalValues = value;
 }
 int RelationStatistics::RowCount(){
@@ -99,16 +110,10 @@ int RelationStatistics::ColumnCount(){
     return columnCount;
 }
 void RelationStatistics::Print(){
-    std::cout << "Relation Statistics" << std::endl;
-    std::cout << "Row count: " << rowCount << std::endl;
-    std::cout << "Column count: " << columnCount << std::endl;
-    std::cout << "Column statistics: " << std::endl;
+    printf("Relation Statistics (%dx%d):\n", rowCount, columnCount);
+    printf("  %-7s %-15s %-15s %-15s %-15s\n", "Column", "Lower bound", "Upper bound", "Distinct values", "Total values");
     for (int i=0; i<columnCount; i++){
-        std::cout << "-- Column [" << i  << "] --" << std::endl;
-        std::cout << "  Lower bound: " << stats[i].lowerBound << std::endl;
-        std::cout << "  Upper bound: " << stats[i].upperBound << std::endl;
-        std::cout << "  Distinct values: " << stats[i].distinctValues << std::endl;
-        std::cout << "  Total values: " << stats[i].totalValues << std::endl;
+        printf("  %-7d %-15.2f %-15.2f %-15.2f %-15.2f\n", i, stats[i].lowerBound, stats[i].upperBound, stats[i].distinctValues, stats[i].totalValues);
     }
     std::cout << std::endl;
 }
@@ -117,10 +122,120 @@ Relation* RelationStatistics::GetRelation(){
 }
 
 
+
+
+
+
+
+
+
+
+
+// ======= BestTree ======= //
+
+int BestTree::hash(Vector<uint> joinIDs){
+    int hash = 0;
+    for (uint i=0; i<joinIDs.get_size(); i++){
+        hash += pow(2, joinIDs[i]);
+    }
+    return hash;
+}
+
+
+RelationStatistics *BestTree::GetStats(Vector<uint> joinIDs){
+    int hash = BestTree::hash(joinIDs);
+    return stats[hash];
+}
+
+Vector<uint> BestTree::GetBestTree(Vector<uint> orderedIDs){
+    int hash = BestTree::hash(orderedIDs);
+    return orderedIDs[hash];
+}
+
+void BestTree::SetBestTree(Vector<uint> joinIDs, Vector<uint> orderedIDs){
+    int hash = BestTree::hash(joinIDs);
+    this->orderedIDs[hash] = orderedIDs;
+}
+
+void BestTree::Initialize(int relationID, RelationStatistics *relStats){
+    Vector<uint> relationIDs = Vector<uint>(1);
+    relationIDs.set(0, relationID);
+    orderedIDs.push(relationIDs);
+    stats.push(relStats);
+}
+
+void BestTree::SetStats(Vector<uint> joinIDs, RelationStatistics *relStats){
+    int index = hash(joinIDs);
+
+    // Resize Vector if necessary
+    while (index >= (int)stats.get_size()){
+        stats.push(NULL);
+        orderedIDs.push(Vector<uint>());
+    }
+
+    if (stats.get_size() != orderedIDs.get_size()){
+        printf("[ERROR] stats and orderedIDs have different sizes (%d vs %d)", stats.get_size(), orderedIDs.get_size());
+        exit(1);
+    }
+
+    stats[index] = relStats;
+}
+
+Vector<Vector<uint>> BestTree::GetCombinations(Vector<uint> ids, int n){
+    
+    // Create combinations of size n
+
+    Vector<Vector<uint>> combinations = Vector<Vector<uint>>();
+
+    if (n == 1){
+        for (uint i=0; i<ids.get_size(); i++){
+            Vector<uint> combination = Vector<uint>(1);
+            combination.set(0, ids[i]);
+            combinations.push(combination);
+        }
+    } else {
+        for (uint i=0; i<ids.get_size(); i++){
+            Vector<uint> newIDs = Vector<uint>(ids.get_size()-1);
+            int index = 0;
+            for (uint j=0; j<ids.get_size(); j++){
+                if (j == i) continue;
+                newIDs.set(index, ids[j]);
+                index++;
+            }
+            Vector<Vector<uint>> newCombinations = GetCombinations(newIDs, n-1);
+            for (uint j=0; j<newCombinations.get_size(); j++){
+                Vector<uint> combination = Vector<uint>(n);
+                combination.set(0, ids[i]);
+                for (int k=0; k<n-1; k++){
+                    combination.set(k+1, newCombinations[j][k]);
+                }
+                combinations.push(combination);
+            }
+        }
+    }
+
+    return combinations;
+
+}
+
+double BestTree::GetCost(Vector<uint> joinIDs){
+    int index = hash(joinIDs);
+    double cost = stats[index]->TotalValues(0);
+    return cost;
+}
+
+
+
+
+
+
+
+
+
 // ======= Optimizer ======= //
 
 
-void Optimizer::OptimizeFilterEqual(RelationStatistics &rs, int column, int value){
+void Optimizer::OptimizeFilterEqual(RelationStatistics *rs, int column, double value){
 
     // Calculate new statistics for column
     int A_lowerBound = value;
@@ -129,8 +244,8 @@ void Optimizer::OptimizeFilterEqual(RelationStatistics &rs, int column, int valu
     int A_totalValues;
 
 
-    if (rs.GetRelation()->columns[column].contains(value)){
-        A_totalValues = rs.TotalValues(column) / rs.DistinctValues(column);
+    if (rs->GetRelation()->columns[column].contains(value)){
+        A_totalValues = rs->TotalValues(column) / rs->DistinctValues(column);
     } else {
         A_totalValues = 0;
     }
@@ -138,49 +253,56 @@ void Optimizer::OptimizeFilterEqual(RelationStatistics &rs, int column, int valu
 
 
     // Caclulate new statistics for other columns
-    for (int i=0; i< rs.ColumnCount(); i++){
+    for (int i=0; i< rs->ColumnCount(); i++){
         if (i == column) continue;
 
-        // int dA = rs.DistinctValues(column);
-        int dC = rs.DistinctValues(i);
-        int fA = rs.TotalValues(column);
-        int fC = rs.TotalValues(i);
+        // int dA = rs->DistinctValues(column);
+        int dC = rs->DistinctValues(i);
+        int fA = rs->TotalValues(column);
+        int fC = rs->TotalValues(i);
         int fA_new = A_totalValues;
 
         int C_distinctValues = dC * (1 - pow((1 - fA_new / fA), fC/dC) );
         int C_totalValues = fA_new;
 
-        rs.DistinctValues(i, C_distinctValues);
-        rs.TotalValues(i, C_totalValues);
+        rs->DistinctValues(i, C_distinctValues);
+        rs->TotalValues(i, C_totalValues);
     }
 
 
     
     // Update statistics of column
-    rs.LowerBound(column, A_lowerBound);
-    rs.UpperBound(column, A_upperBound);
-    rs.DistinctValues(column, A_distinctValues);
-    rs.TotalValues(column, A_totalValues);
+    rs->LowerBound(column, A_lowerBound);
+    rs->UpperBound(column, A_upperBound);
+    rs->DistinctValues(column, A_distinctValues);
+    rs->TotalValues(column, A_totalValues);
 
 }
 
-void Optimizer::OptimizeFilterLessGreater(RelationStatistics &rs, int column, int value, bool less){
+RelationStatistics Optimizer::OptimizeFilterLessGreater(RelationStatistics *rs, int column, double value, bool less, bool inplace=true){
+
+    RelationStatistics new_rs; 
+
+    if (!inplace){
+        new_rs = *rs;
+        rs = &new_rs;
+    }
 
     // Calculate new statistics for column
-    int A_lowerBound;
-    int A_upperBound;
-    int A_distinctValues;
-    int A_totalValues;
+    double A_lowerBound;
+    double A_upperBound;
+    double A_distinctValues;
+    double A_totalValues;
 
-    int k1;
-    int k2;
+    double k1;
+    double k2;
 
     if (less){
-        A_lowerBound = rs.LowerBound(column);
+        A_lowerBound = rs->LowerBound(column);
         A_upperBound = value;
     } else {
         A_lowerBound = value;
-        A_upperBound = rs.UpperBound(column);
+        A_upperBound = rs->UpperBound(column);
     }
 
     if (less){
@@ -191,41 +313,181 @@ void Optimizer::OptimizeFilterLessGreater(RelationStatistics &rs, int column, in
         k2 = A_upperBound;
     }
 
-    A_distinctValues = (k2 - k1) / (rs.UpperBound(column) - rs.LowerBound(column) ) * rs.DistinctValues(column);
-    A_totalValues = (k2 - k1) / (rs.UpperBound(column) - rs.LowerBound(column) ) * rs.TotalValues(column);
+    A_distinctValues = (k2 - k1) / (rs->UpperBound(column) - rs->LowerBound(column) ) * rs->DistinctValues(column);
+    A_totalValues = (k2 - k1) / (rs->UpperBound(column) - rs->LowerBound(column) ) * rs->TotalValues(column);
 
 
     // Caclulate new statistics for other columns
-    for (int i=0; i< rs.ColumnCount(); i++){
+    for (int i=0; i< rs->ColumnCount(); i++){
         if (i == column) continue;
 
         
-        // int dA = rs.DistinctValues(column);
-        int dC = rs.DistinctValues(i);
-        int fA = rs.TotalValues(column);
-        int fC = rs.TotalValues(i);
-        int fA_new = A_totalValues;
+        // double dA = rs->DistinctValues(column);
+        double dC = rs->DistinctValues(i);
+        double fA = rs->TotalValues(column);
+        double fC = rs->TotalValues(i);
+        double fA_new = A_totalValues;
 
-        int C_distinctValues = dC * (1 - pow((1 - fA_new / fA), fC/dC) );
-        int C_totalValues = fA_new;
+        double C_distinctValues = dC * (1 - pow((1 - fA_new / fA), fC/dC) );
+        double C_totalValues = fA_new;
 
-        rs.DistinctValues(i, C_distinctValues);
-        rs.TotalValues(i, C_totalValues);
+        rs->DistinctValues(i, C_distinctValues);
+        rs->TotalValues(i, C_totalValues);
+
     }
 
     // Update statistics of column
-    rs.LowerBound(column, A_lowerBound);
-    rs.UpperBound(column, A_upperBound);
-    rs.DistinctValues(column, A_distinctValues);
-    rs.TotalValues(column, A_totalValues);
+    rs->LowerBound(column, A_lowerBound);
+    rs->UpperBound(column, A_upperBound);
+    rs->DistinctValues(column, A_distinctValues);
+    rs->TotalValues(column, A_totalValues);
 
+    return *rs;
+
+}
+
+void Optimizer::OptimizeSelfJoin(RelationStatistics *rs, int column1, int column2){
+    
+    // Calculate new statistics for columns
+    double A_lowerBound;
+    double A_upperBound;
+    double A_distinctValues;
+    double A_totalValues;
+
+
+    A_lowerBound = std::max(rs->LowerBound(column1), rs->LowerBound(column2));
+    A_upperBound = std::min(rs->UpperBound(column1), rs->UpperBound(column2));
+
+    double n = A_upperBound - A_lowerBound + 1;
+
+    A_totalValues = rs->TotalValues(column1) / n;
+    A_distinctValues = rs->DistinctValues(column1) * (1 -  pow ( (1 - A_totalValues/rs->TotalValues(column1)), rs->TotalValues(column1)/rs->DistinctValues(column1)));
+
+    // Caclulate new statistics for other columns
+    for (int i=0; i< rs->ColumnCount(); i++){
+        if (i == column1 || i == column2) continue;
+
+        double dC = rs->DistinctValues(i);
+        double fA = rs->TotalValues(column1);
+        double fC = rs->TotalValues(i);
+        double fA_new = A_totalValues;
+
+        double C_distinctValues = dC * (1 - pow((1 - fA_new / fA), fC/dC) );
+        double C_totalValues = fA_new;
+
+        rs->DistinctValues(i, C_distinctValues);
+        rs->TotalValues(i, C_totalValues);
+    }
+
+    // Update statistics of column1
+    rs->LowerBound(column1, A_lowerBound);
+    rs->UpperBound(column1, A_upperBound);
+    rs->DistinctValues(column1, A_distinctValues);
+    rs->TotalValues(column1, A_totalValues);
+
+    // Update statistics of column2
+    rs->LowerBound(column2, A_lowerBound);
+    rs->UpperBound(column2, A_upperBound);
+    rs->DistinctValues(column2, A_distinctValues);
+    rs->TotalValues(column2, A_totalValues);
 }
 
 
 
+
+RelationStatistics *Optimizer::OptimizeJoin(RelationStatistics *rs1, RelationStatistics *rs2, int column1, int column2){
+
+    // Create new tuples for each relation
+
+    double l = std::max(rs1->LowerBound(column1), rs2->LowerBound(column2));
+    double u = std::min(rs1->UpperBound(column1), rs2->UpperBound(column2));
+    double n = u - l + 1;
+
+    RelationStatistics A = OptimizeFilterLessGreater(rs1, column1, u, true, false);
+    RelationStatistics B = OptimizeFilterLessGreater(rs2, column2, u, true, false);
+
+    OptimizeFilterLessGreater(&A, column1, l, false, true);
+    OptimizeFilterLessGreater(&B, column2, l, false, true);
+
+    double A_lowerBound;
+    double A_upperBound;
+    double A_distinctValues;
+    double A_totalValues;
+
+    double B_lowerBound;
+    double B_upperBound;
+    double B_distinctValues;
+    double B_totalValues;
+
+    A_lowerBound = B_lowerBound = l;
+    A_upperBound = B_upperBound = u;
+    A_totalValues = B_totalValues = A.TotalValues(column1) * B.TotalValues(column2) / n;
+    A_distinctValues = B_distinctValues = A.DistinctValues(column1) * B.DistinctValues(column2) / n;
+
+
+    // Calculate statistics for other columns
+    for (int i=0; i< rs1->ColumnCount(); i++){
+        if (i == column1) continue;
+        double C_lowerBound = A.LowerBound(i);
+        double C_upperBound = A.UpperBound(i);
+        double C_totalValues = A_totalValues;
+
+        double dC = A.DistinctValues(i);
+        double dA_new = A_distinctValues;
+        double dA = A.DistinctValues(column1);
+        double fC = A.TotalValues(i);
+        double C_distinctValues = dC * (1 - pow((1 - dA_new / dA), fC/dC) );
+
+        // Apply new statistics
+        A.LowerBound(i, C_lowerBound);
+        A.UpperBound(i, C_upperBound);
+        A.DistinctValues(i, C_distinctValues);
+        A.TotalValues(i, C_totalValues);
+
+    }
+    for (int i=0; i< rs2->ColumnCount(); i++){
+        if (i == column2) continue;
+        double C_lowerBound = B.LowerBound(i);
+        double C_upperBound = B.UpperBound(i);
+        double C_totalValues = B_totalValues;
+
+        double dC = B.DistinctValues(i);
+        double dB_new = B_distinctValues;
+        double dB = B.DistinctValues(column2);
+        double fC = B.TotalValues(i);
+        double C_distinctValues = dC * (1 - pow((1 - dB_new / dB), fC/dC) );
+
+        // Apply new statistics
+        B.LowerBound(i, C_lowerBound);
+        B.UpperBound(i, C_upperBound);
+        B.DistinctValues(i, C_distinctValues);
+        B.TotalValues(i, C_totalValues);
+    }
+
+    // Update statistics of A
+    A.LowerBound(column1, A_lowerBound);
+    A.UpperBound(column1, A_upperBound);
+    A.DistinctValues(column1, A_distinctValues);
+    A.TotalValues(column1, A_totalValues);
+
+    // Update statistics of B
+    B.LowerBound(column2, B_lowerBound);
+    B.UpperBound(column2, B_upperBound);
+    B.DistinctValues(column2, B_distinctValues);
+    B.TotalValues(column2, B_totalValues);
+
+    // Concatenate A and B
+    RelationStatistics *rs = new RelationStatistics(&A, &B);
+
+    return rs;
+
+}
+
 Optimizer::Optimizer(Vector<Relation *> *relations, Vector<QueryInfo *> *queries){
     this->relations = relations;
     this->queries = queries;
+    this->allRelationStats = new Vector<RelationStatistics *>();
+    this->allQueryStats = new Vector<Vector<RelationStatistics *> *>();
 }
 
 Optimizer::~Optimizer(){
@@ -233,18 +495,28 @@ Optimizer::~Optimizer(){
 }
 
 
+
+
+
+
+
+
+
+
+
+
 void Optimizer::Optimize(){
 
     //// Calculate statistics for each relation
     for(uint i = 0; i < relations->get_size(); i++){
-        RelationStatistics rs = RelationStatistics(relations->get(i));
-        allRelationStats.push(rs);
+        RelationStatistics *rs = new RelationStatistics(relations->get(i));
+        allRelationStats->push(rs);
     }
 
 
     //// Initialize query statistics
     for (uint i=0; i<queries->get_size(); i++){
-        Vector<RelationStatistics> qs;
+        Vector<RelationStatistics *> *qs = new Vector<RelationStatistics *>();
 
         // Get query
         QueryInfo *queryInfo = queries->get(i);
@@ -253,29 +525,28 @@ void Optimizer::Optimize(){
         Vector<unsigned> *relationIds = &(queryInfo->relationIds);
         for (uint i = 0; i < relationIds->get_size(); i++){
             RelationId relationId = relationIds->get(i);
-            RelationStatistics rs = RelationStatistics(allRelationStats.get(relationId));
-            qs.push(rs);
+            RelationStatistics *rs = new RelationStatistics(allRelationStats->get(relationId));
+            qs->push(rs);
         }
         
         // Add query statistics to vector
-        allQueryStats.push(qs);
+        allQueryStats->push(qs);
 
     }
-
 
     //// Optimize each query
     for (uint i=0; i<queries->get_size(); i++){
         QueryInfo *queryInfo = queries->get(i);
-        Vector<RelationStatistics> qs = allQueryStats.get(i);
+        Vector<RelationStatistics *> *qs = allQueryStats->get(i);
 
         // Optimize each filter
         for (uint j=0; j<queryInfo->filters.get_size(); j++){
             
             // Get filter
-            FilterInfo filterInfo = queryInfo->filters.get(j);
+            FilterInfo filterInfo = queryInfo->filters[j];
 
             // Get relation statistics
-            RelationStatistics rs = qs.get(filterInfo.filterColumn.binding);
+            RelationStatistics *rs = qs->get(filterInfo.filterColumn.binding);
 
             // Optimize filter A = k
             if (filterInfo.comparison == FilterInfo::Equal){
@@ -289,16 +560,129 @@ void Optimizer::Optimize(){
             else if (filterInfo.comparison == FilterInfo::Greater){
                 OptimizeFilterLessGreater(rs, filterInfo.filterColumn.colId, filterInfo.constant, false);
             }
+        }
+    }
 
-            
-            // Update relation statistics
-            qs.set(filterInfo.filterColumn.binding, rs);
+    //// Optimize self joins
 
+    // For each query
+    for (uint i=0; i<queries->get_size(); i++){
+        QueryInfo *queryInfo = queries->get(i);
+        Vector<RelationStatistics *> *qs = allQueryStats->get(i);
+
+        // Optimize each join
+        for (uint j=0; j<queryInfo->predicates.get_size(); j++){
+
+            // Get predicate
+            PredicateInfo predicateInfo = queryInfo->predicates[j];
+
+            // Get relation statistics
+            RelationStatistics *rs1 = qs->get(predicateInfo.left.binding);
+
+            // Optimize self join
+            if (predicateInfo.left.binding == predicateInfo.right.binding){
+                OptimizeSelfJoin(rs1, predicateInfo.left.colId, predicateInfo.right.colId);
+            }
+        
         }
 
-        // Update query statistics
-        allQueryStats.set(i, qs);
     }
+
+
+    //// Calulate cost tree for each query ////
+
+
+    // For each query
+    for (uint i=0; i<queries->get_size(); i++){
+        QueryInfo *queryInfo = queries->get(i);
+        Vector<RelationStatistics *> *qs = allQueryStats->get(i);
+
+        BestTree bestTree;
+
+        for (uint j=0; j<queryInfo->relationIds.get_size(); j++){
+            // Get relation statistics
+            RelationStatistics *rs = qs->get(j);
+            bestTree.Initialize(j, rs);
+        }
+
+
+        // for j cardinality of join
+        for (uint j=1; j<queryInfo->relationIds.get_size(); j++){
+            // for each combination of size j
+
+            Vector<Vector<uint>> combinations = BestTree::GetCombinations(queryInfo->relationIds, j);
+
+            for (uint c; c<combinations.get_size(); c++){
+                Vector<uint> combination = combinations[c];
+
+                // for each relation not in combination
+                for (uint k=0; k<queryInfo->relationIds.get_size(); k++){
+                    if (combination.contains(k)) continue;
+
+                    Vector<PredicateInfo> predicates = queryInfo->predicates;
+
+                    // if relation doesn't join with current combination then skip
+                    bool connected = false;
+                    int combinationColumn;
+                    int relationColumn;
+                    for (uint p=0; p<predicates.get_size(); p++){
+                        PredicateInfo predicate = predicates[p];
+                        if (combination.contains(predicate.left.binding) && combination.contains(k)){
+                            connected = true;
+                            combinationColumn = predicate.left.colId;
+                            relationColumn = predicate.right.colId;
+                            break;
+                        }
+                        else if (combination.contains(predicate.right.binding) && combination.contains(k)){
+                            connected = true;
+                            combinationColumn = predicate.right.colId;
+                            relationColumn = predicate.left.colId;
+                            break;
+                        }
+                    }
+                    if (!connected) continue;
+
+                    // Get current tree
+                    Vector<uint> currTree = bestTree.GetBestTree(combination);
+                    currTree.push(k);
+                    
+                    Vector<uint> currCombination = combination;
+                    currCombination.push(k);
+
+                    // Calculate cost of new tree
+                    RelationStatistics *rs1 = bestTree.GetStats(combination);
+                    RelationStatistics *rs2 = bestTree.GetStats(k);
+
+                    RelationStatistics *rs3 = OptimizeJoin(rs1, rs2, combinationColumn, relationColumn);
+
+                    // Set stats of new tree
+                    bestTree.SetStats(currCombination, rs3);
+
+                    // Get cost of current tree
+                    double currCost = bestTree.GetCost(currTree);
+
+                    // Get cost of new tree
+                    double newCost = bestTree.GetCost(currCombination);
+
+                    // If new tree is better then update best tree
+                    if (newCost < currCost || currCost == -1){
+                        bestTree.SetBestTree(currCombination, currTree);
+                    }
+
+
+
+                }
+            }
+        }
+
+        // Print best tree
+        std::cout << "Best Tree: ";
+        bestTree.GetBestTree(queryInfo->relationIds).print();
+
+
+
+    }
+
 
 }
 
