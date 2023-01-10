@@ -27,6 +27,7 @@ int main(){
     jsch::JobScheduler jobScheduler(10);
 
 
+
     //Read filenames of relations from stdin
     Utils::readRelations(std::cin,relations);
     
