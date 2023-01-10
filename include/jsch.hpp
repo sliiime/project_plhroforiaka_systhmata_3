@@ -172,7 +172,7 @@ namespace jsch{
 
                                 size_t total;
                                 DependentJob* dependent = NULL;
-                                RequiredJob* next;
+                                RequiredJob* next = NULL;
 
                                 JobScheduler& jobScheduler;
 
@@ -184,14 +184,33 @@ namespace jsch{
 
                         size_t reqCount = 0;
                         
-                        RequiredJob* required;
-                        DependentJob* dependent;
+                        RequiredJob* required = NULL;
+                        RequiredJob* lastReq;
+
+                        DependentJob* dependent = NULL;
+                        DependentJob* lastDep;
+
                         JobScheduler& jobScheduler;
 
                     public:
 
                         MultiJobSequence(Job* req,Job* dep,JobScheduler& jobScheduler) : 
-                        required(new RequiredJob(req,jobScheduler)),dependent(new DependentJob(dep)),jobScheduler(jobScheduler){}
+                        reqCount(1),required(new RequiredJob(req,jobScheduler)),jobScheduler(jobScheduler) {
+
+                            DependentJob* _dep = new DependentJob(dep);
+                            RequiredJob*  _req = new RequiredJob(req,jobScheduler);
+
+                            this->required = _req;
+                            this->lastReq = _req;
+                            this->dependent = _dep;
+                            this->lastDep = _dep;
+                        }
+
+                        MultiJobSequence(Job* req,JobScheduler& jobScheduler) : reqCount(1),jobScheduler(jobScheduler){
+                            RequiredJob* _req = new RequiredJob(req,jobScheduler);
+                            this->required = _req;
+                            this->lastReq = _req;
+                        }
 
                         virtual void* execute(){
 
@@ -202,7 +221,7 @@ namespace jsch{
                             *counter = 0;
 
                             auto cleanupJob = make_job(
-                                [&]{
+                                [=]{
                                     pthread_mutex_destroy(mutex);
                                     delete counter;
                                 }
@@ -210,6 +229,7 @@ namespace jsch{
 
                             //Need 2 check if dependent->next == NULL
                             dependent->next = new DependentJob(cleanupJob);
+
 
                             for (RequiredJob* trav = required; trav != NULL; trav = trav->next){
                                 trav->counter = counter;
@@ -224,15 +244,24 @@ namespace jsch{
                         }
 
                         MultiJobSequence* addRequirement(Job* job){
-                            for (RequiredJob* trav = required; trav->next != NULL; trav = trav->next) trav->next = new RequiredJob(job,jobScheduler);
+                            reqCount++;
+                            lastReq->next = new RequiredJob(job,jobScheduler);
+                            lastReq = lastReq->next;
+                            
                             return this; 
                         }
 
                         MultiJobSequence* addDependent(Job* job){
                             /*Initialize list of dependent jobs */
-                            if (dependent == NULL) dependent = new DependentJob(job);
+                            if (dependent == NULL) {
+                                dependent = new DependentJob(job);
+                                lastDep = dependent;
+                            }
                             /*or append dependent job to the end of the list*/
-                            else for (DependentJob* trav = dependent; trav->next != NULL; trav = trav->next) trav->next = new DependentJob(job);
+                            else {
+                                lastDep->next = new DependentJob(job);
+                                lastDep = lastDep->next;
+                            }
 
                             return this; 
                         }
@@ -247,6 +276,9 @@ namespace jsch{
 
                 MultiJobSequence* makeMultiJobSequence(Job* req,Job* dep){
                     return new MultiJobSequence(req,dep,*this);
+                }
+                MultiJobSequence* makeMultiJobSequence(Job* req){
+                    return new MultiJobSequence(req,*this);
                 }
     };   
 

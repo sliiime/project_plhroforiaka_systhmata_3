@@ -60,7 +60,7 @@ Joint::Joint(Column *c1, Column *c2, jsch::JobScheduler& jobScheduler){
     Vector<Tuple> workerTuples[pm1.size];
     auto job1 = jsch::make_job(
         [&]{
- // Pick the smaller partition to make the Hash Table
+             // Pick the smaller partition to make the Hash Table
             uint workerId = 0;
 
             bool swapped = false;
@@ -107,10 +107,10 @@ Joint::Joint(Column *c1, Column *c2, jsch::JobScheduler& jobScheduler){
         }
     );
 
-    jsch::JobScheduler::JobSequence* jobSequence = jobScheduler.makeJobSequence(job1);
+    jsch::JobScheduler::MultiJobSequence* multiJobSequence = jobScheduler.makeMultiJobSequence(job1);
     // Iterate over the partitions
     for (uint i=1; i<pm1.size; i++){
-        jobSequence->then(jsch::make_job([&,i]{
+        multiJobSequence->addRequirement(jsch::make_job([&,i]{
             // Pick the smaller partition to make the Hash Table
             uint workerId = i;
 
@@ -158,6 +158,7 @@ Joint::Joint(Column *c1, Column *c2, jsch::JobScheduler& jobScheduler){
         }));   
     }
 
+
     auto job2 = jsch::make_job(
         [&]{
             uint totalTuples = 0;
@@ -173,12 +174,13 @@ Joint::Joint(Column *c1, Column *c2, jsch::JobScheduler& jobScheduler){
         }
     );
 
-    jobSequence->then(job2);
+    multiJobSequence->addDependent(job2);
 
     //Calculate total number of tuples, so vector doesn't have to resize 
     
-    jobScheduler.submitJob(jobSequence);
+    jobScheduler.submitJob(multiJobSequence);
     jobScheduler.wait();
+
 }
 
 
