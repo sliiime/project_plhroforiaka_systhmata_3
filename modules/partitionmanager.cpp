@@ -233,7 +233,6 @@ void PartitionManager::Reorder(uint n_bits,jsch::JobScheduler& jobScheduler) {
     
     auto job1 = jsch::make_job(
         [&]{
-            std::cout << "Ftiaxnw istogramma,des me " << std::endl;
             CreateHistogram(&args[0]);
         }
     );
@@ -254,7 +253,7 @@ void PartitionManager::Reorder(uint n_bits,jsch::JobScheduler& jobScheduler) {
     Histogram *new_psum;
     Tuple *reordered_tuples;
     int *bucket_map;
-    Histogram bucket_count;
+    Histogram bucket_count = Histogram(this->size);
     pthread_mutex_t locks[this->size];
     int sub_bucket_count;
     CopyArgs copy_args[num_threads];
@@ -305,8 +304,6 @@ void PartitionManager::Reorder(uint n_bits,jsch::JobScheduler& jobScheduler) {
             for (int i=0; i < new_psum->size; i++){
                 bucket_map[i] = new_psum->data[new_psum->data[i].key].payload;
             }
-            // Count how many values are in each bucket
-            bucket_count = Histogram(this->size);
             for (uint i=0; i<this->size; i++){
                 pthread_mutex_init(&locks[i], NULL);
             }
@@ -324,9 +321,6 @@ void PartitionManager::Reorder(uint n_bits,jsch::JobScheduler& jobScheduler) {
             }
             // Set last thread to have the remaining tuples
             copy_args[num_threads-1].size = num_tuples_last_thread;
-            std::cout << "reordered_tuples " << reordered_tuples << std::endl;
-            std::cout << "bucket_map " << bucket_map << std::endl;
-
         }
     );
 
@@ -357,7 +351,6 @@ void PartitionManager::Reorder(uint n_bits,jsch::JobScheduler& jobScheduler) {
     for (int i=0; i<num_threads; i++){
         jobSequence->then(jsch::make_job(
             [&,i]{
-                std::cout << "kanw to copy me ari8mo " << i << std::endl;
                 CopyTuples(&copy_args[i]);
             }
         ));
@@ -366,7 +359,6 @@ void PartitionManager::Reorder(uint n_bits,jsch::JobScheduler& jobScheduler) {
     jobScheduler.submitJob(jobSequence);
     jobScheduler.wait();
 
-    std::cout << "Stamathsa na perimenw :O" << std::endl; 
     // Destroy locks
     for (uint i=0; i<this->size; i++){
         pthread_mutex_destroy(&locks[i]);
