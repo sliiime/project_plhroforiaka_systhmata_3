@@ -25,6 +25,8 @@ void* jsch::JobScheduler::work(){
             pthread_mutex_unlock(&waitMutex);
         } 
     }
+    /*Find better return value*/
+    return NULL;
 }
 
 
@@ -83,7 +85,7 @@ size_t jsch::JobScheduler::workersCount() const {
 
 size_t jsch::JobScheduler::jobsCompleted() const {
     size_t jobsCompleted = 0;
-    for (int i = 0 ; i < total; i++) jobsCompleted += completed[i];
+    for (size_t i = 0 ; i < total; i++) jobsCompleted += completed[i];
     
     return jobsCompleted;
 }

@@ -48,6 +48,7 @@ namespace jsch{
     
     typedef void* (*workPtr)(void*);
 
+
     class JobScheduler{
 
             private:
@@ -57,6 +58,7 @@ namespace jsch{
                 size_t* completed;
                 ccqueue<Job*> queue;
                 pthread_t* workers;
+                /*Total workers*/
                 size_t total;
 
                 /*Workers that are currently executing a job*/
@@ -88,10 +90,49 @@ namespace jsch{
                 void block();
                 void submitJob(Job* job);
                 size_t workersCount() const;
+            
+            public :
+
+
+                class JobSequence : public Job {
+
+                friend JobScheduler;
+
+                private:
+                Job* job;
+                JobScheduler& jobScheduler;
+                JobSequence* next = NULL;
+                protected:
+                    JobSequence(Job* job,JobScheduler& jobScheduler ) : job(job), jobScheduler(jobScheduler) {}
+                public:
+
+                    virtual void* execute(){
+                        job->execute();
+                        if( next != NULL) jobScheduler.submitJob(next);
+                        /*Find better return value*/
+                        return NULL;
+                    }
+
+                    virtual ~JobSequence() override{
+                        delete job;
+                    }
+
+                    JobSequence* then(Job* job){
+                        JobSequence* trav = this;
+                        while(trav->next != NULL) trav = trav->next;
+                        trav->next = new JobSequence(job,jobScheduler);
+                        return this;
+                    }
+                };
+
+                JobSequence* makeJobSequence(Job* job){
+                    return new JobSequence(job,*this);
+                }
+    };   
 
                 
                 
-    };  
-}
+};
+    
 
 #endif
