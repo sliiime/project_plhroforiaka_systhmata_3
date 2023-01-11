@@ -178,8 +178,8 @@ Joint::Joint(Column *c1, Column *c2, jsch::JobScheduler& jobScheduler){
 
     //Calculate total number of tuples, so vector doesn't have to resize 
     
-    jobScheduler.submitJob(multiJobSequence);
-    jobScheduler.wait();
+    jsch::Future* future = jobScheduler.submitJobWithFuture(multiJobSequence);
+    future->wait();
 
 }
 

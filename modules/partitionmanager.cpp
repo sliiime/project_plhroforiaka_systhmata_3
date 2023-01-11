@@ -359,9 +359,9 @@ void PartitionManager::Reorder(uint n_bits,jsch::JobScheduler& jobScheduler) {
     }
 
     multiJobSequence->addDependent(multiJobSequence2);
-    jobScheduler.submitJob(multiJobSequence);
+    jsch::Future* future = jobScheduler.submitJobWithFuture(multiJobSequence);
 
-    jobScheduler.wait();
+    future->wait();
 
     // Destroy locks
     for (uint i=0; i<this->size; i++){

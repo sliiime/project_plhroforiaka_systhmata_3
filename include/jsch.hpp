@@ -11,16 +11,74 @@
 namespace jsch{
 
 
+
     class Future {
-        private:
+
+
+        public:
+
             pthread_mutex_t* mutex;
             pthread_cond_t* cond;
             bool* complete;
-        public:
-            ~Future(){
-                delete mutex;
-                delete cond;
+
+            void done(){
+                *complete = true;
+                pthread_cond_broadcast(cond);
             }
+
+            Future(): mutex(new pthread_mutex_t), cond(new pthread_cond_t), complete(new bool(false)){
+                pthread_mutex_init(mutex,NULL);
+                pthread_cond_init(cond,NULL);
+            }
+
+            Future(const Future& f): cond(f.cond),complete(f.complete),mutex(f.mutex) {}
+        
+        protected:
+            Future(bool* complete) : mutex(new pthread_mutex_t),cond(new pthread_cond_t),complete(complete) {
+                pthread_mutex_init(mutex,NULL);
+                pthread_cond_init(cond,NULL);
+
+            }
+
+        public:
+            ~Future(){ }
+
+            virtual void wait(){
+                pthread_mutex_lock(mutex);
+                    while (! *complete) pthread_cond_wait(cond,mutex);
+                pthread_mutex_unlock(mutex); 
+            }
+    };
+
+
+    class MultiFuture : public Future {
+
+        private:
+
+            static const size_t MAX_FUTURES = 256;
+            
+
+
+        public:
+
+            size_t totalFutures = 0;
+
+            MultiFuture(): Future(new bool[256]) {}
+
+            virtual void wait() override {
+                pthread_mutex_lock(mutex);
+                    while (!checkDone()) pthread_cond_wait(cond,mutex);
+                pthread_mutex_unlock(mutex);
+            }
+
+            bool checkDone(){
+                for (size_t i = 0; i < totalFutures; i++){
+                    if (!complete[i]) return false;
+                }
+                return true;
+            }
+
+
     };
 
     class Job{
@@ -28,10 +86,16 @@ namespace jsch{
 
             virtual void* execute() = 0;
             virtual ~Job() = default;
+            virtual Future* enableFuture() = 0;
+            virtual void enableFuture(const Future& future,size_t& totalJobs) = 0;
+
+        protected:
+            Future* future;
     };
 
     template<typename S>
     class JobSpecification : public Job {
+
 
         private:
 
@@ -43,9 +107,21 @@ namespace jsch{
 
             void* execute() override {
                 spec();
+                if (future != NULL) future->done();
                 /*find a different return value?*/
                 return NULL;
             }
+
+            virtual Future* enableFuture() override {
+                this->future = new Future();
+                return this->future;
+            }
+
+            virtual void enableFuture(const Future& future,size_t& totalJobs) override{
+                this->future = new Future(future);
+            }
+
+
 
             virtual ~JobSpecification() override = default;
 
@@ -100,6 +176,7 @@ namespace jsch{
                 void wait();
                 void block();
                 void submitJob(Job* job);
+                Future* submitJobWithFuture(Job* job);
                 size_t workersCount() const;
             
             public :
@@ -120,8 +197,32 @@ namespace jsch{
                     virtual void* execute(){
                         job->execute();
                         if( next != NULL) jobScheduler.submitJob(next);
+                        else {
+                            if (future != NULL) future->done();
+                        }
                         /*Find better return value*/
                         return NULL;
+                    }
+
+                    virtual Future* enableFuture() override {
+                        JobSequence* trav = this;
+                        while (trav->next != NULL) trav = trav -> next;
+
+                        this->future = trav->job->enableFuture();
+                        
+                        return this->future;
+
+                    }
+
+                    virtual void enableFuture(const Future& future,size_t& totalJobs) override {
+
+                        JobSequence* trav = this;
+                        while (trav->next != NULL) trav = trav -> next;
+
+                        /*In order not to call JobSequence::enableFuture again*/
+                        trav->job->enableFuture(future,totalJobs);
+                        
+                        
                     }
 
                     virtual ~JobSequence() override{
@@ -139,6 +240,7 @@ namespace jsch{
 
                 class MultiJobSequence : public Job {
                     friend JobScheduler;
+
                     private :
 
                         class DependentJob : public Job {
@@ -149,9 +251,20 @@ namespace jsch{
                                     /*Find better return value*/
                                     return NULL;
                                 }
+
+                                virtual Future* enableFuture() override{
+                                    this->future = new Future();
+                                    return this->future;
+                                }
+
+                                virtual void enableFuture(const Future& future,size_t& totalJobs) override {
+                                    this->job->enableFuture(future,totalJobs);
+                                }
+
                                 virtual ~DependentJob() override {
                                     delete job;
                                 }
+
                             private:
                                 Job* job;
                                 DependentJob* next = NULL;
@@ -161,6 +274,7 @@ namespace jsch{
 
                         class RequiredJob : public Job {
                             friend MultiJobSequence;
+
                             public:
                                 virtual void* execute(){
                                     job->execute();
@@ -176,6 +290,18 @@ namespace jsch{
 
 
                                 }
+
+                                virtual Future* enableFuture() override {
+                                    assert(false);
+                                    /*Avoid warnings*/
+                                    return NULL;
+                                }
+
+                                virtual void enableFuture(const Future& future,size_t& totalJobs) override {
+                                    /*Should not be called under normal circumstances*/
+                                    assert(false);
+                                }
+
                                 ~RequiredJob() override {}
                             private:
                                 Job* job;
@@ -226,6 +352,28 @@ namespace jsch{
                         }
 
                         virtual ~MultiJobSequence() override {} ;
+
+                        virtual Future* enableFuture() override {
+
+                            std::cout << "Kale, lolathike to paidi! Hahahhaha" << std::endl;
+
+                            MultiFuture* multiFuture = new MultiFuture();
+                            this->future = multiFuture;
+
+                            for (DependentJob* trav = dependent; trav != NULL; trav = trav->next){
+                                trav->job->enableFuture(*multiFuture,multiFuture->totalFutures);
+                            }
+
+                            return this->future;
+                            
+                        }
+
+                        virtual void enableFuture(const Future& future,size_t& totalJobs) override{
+                                for (DependentJob* trav = dependent; trav != NULL; trav = trav->next){
+                                    //Only reason this might work is because DependentJob is a list node wrapper
+                                    trav->job->enableFuture(future,totalJobs);
+                                }
+                        }
 
 
                         virtual void* execute(){

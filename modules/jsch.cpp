@@ -67,7 +67,7 @@ jsch::JobScheduler::JobScheduler(size_t workersCount): queue(ccqueue<Job*>()),to
         
     /*Not allowing workers to start until proper structure initialization has taken place */
     pthread_mutex_lock(&waitMutex);
-    for (size_t i = 0 ; i < workersCount; i++) pthread_create(workers+i,NULL,(workPtr)&JobScheduler::work,this);
+        for (size_t i = 0 ; i < workersCount; i++) pthread_create(workers+i,NULL,(workPtr)&JobScheduler::work,this);
     pthread_mutex_unlock(&waitMutex);
 }
 
@@ -77,6 +77,13 @@ void jsch::JobScheduler::submitJob(Job* job){
         queue.push(job);
     }
     else delete job;
+}
+
+jsch::Future* jsch::JobScheduler::submitJobWithFuture(Job* job){
+        Future* future = job->enableFuture();
+        submitJob(job);
+
+        return future;
 }
 
 size_t jsch::JobScheduler::workersCount() const {
