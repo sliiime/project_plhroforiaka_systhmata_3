@@ -11,6 +11,17 @@
 namespace jsch{
 
 
+    class Future {
+        private:
+            pthread_mutex_t* mutex;
+            pthread_cond_t* cond;
+            bool* complete;
+        public:
+            ~Future(){
+                delete mutex;
+                delete cond;
+            }
+    };
 
     class Job{
         public:
@@ -155,7 +166,9 @@ namespace jsch{
                                     job->execute();
                                     pthread_mutex_lock(mutex);
                                         if (++(*counter) == total){
-                                            for (DependentJob* trav = dependent; trav != NULL; trav = trav->next) jobScheduler.submitJob(trav); 
+                                            for (DependentJob* trav = dependent; trav != NULL; trav = trav->next) {
+                                                jobScheduler.submitJob(trav);
+                                            } 
                                         }
                                     pthread_mutex_unlock(mutex);
                                     /*Find better return value*/
@@ -212,8 +225,11 @@ namespace jsch{
                             this->lastReq = _req;
                         }
 
-                        virtual void* execute(){
+                        virtual ~MultiJobSequence() override {} ;
 
+
+                        virtual void* execute(){
+                            
                             pthread_mutex_t* mutex = new pthread_mutex_t;
                             pthread_mutex_init(mutex,NULL);
 
@@ -222,13 +238,21 @@ namespace jsch{
 
                             auto cleanupJob = make_job(
                                 [=]{
+
+                                    //Acquire mutex before destroying it
+                                    pthread_mutex_lock(mutex);
+                                    pthread_mutex_unlock(mutex);
+
                                     pthread_mutex_destroy(mutex);
+
                                     delete counter;
+                                    delete mutex;
                                 }
                             );
 
                             //Need 2 check if dependent->next == NULL
-                            dependent->next = new DependentJob(cleanupJob);
+                            lastDep->next = new DependentJob(cleanupJob);
+                            lastDep = lastDep->next;
 
 
                             for (RequiredJob* trav = required; trav != NULL; trav = trav->next){
@@ -265,8 +289,6 @@ namespace jsch{
 
                             return this; 
                         }
-
-
 
                 };
 
