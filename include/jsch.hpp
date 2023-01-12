@@ -92,6 +92,7 @@ namespace jsch{
 
             virtual void* execute() = 0;
             virtual ~Job() = default;
+
             virtual Future* enableFuture() = 0;
             virtual void gatherFutures(pthread_mutex_t* mutex,pthread_cond_t* cond,bool* complete,size_t& totalJobs) = 0;
 
@@ -225,7 +226,7 @@ namespace jsch{
                         JobSequence* trav = this;
                         while (trav->next != NULL) trav = trav -> next;
 
-                        /*In order not to call JobSequence::enableFuture again*/
+                        /*In order not to call JobSequence::enableFuture again*/ /*Stupid rich*/
                         trav->job->gatherFutures(mutex,cond,complete,totalJobs);
                         
                         
@@ -244,13 +245,14 @@ namespace jsch{
                 };
 
 
-                class MultiJobSequence : public Job {
+                class JobPlan : public Job {
+
                     friend JobScheduler;
 
                     private :
 
                         class DependentJob : public Job {
-                            friend MultiJobSequence;
+                            friend JobPlan;
                             public:
                                 virtual void* execute(){
                                     job->execute();
@@ -279,7 +281,8 @@ namespace jsch{
                         };
 
                         class RequiredJob : public Job {
-                            friend MultiJobSequence;
+                            
+                            friend JobPlan;
 
                             public:
                                 virtual void* execute(){
@@ -341,7 +344,7 @@ namespace jsch{
 
                     public:
 
-                        MultiJobSequence(Job* req,Job* dep,JobScheduler& jobScheduler) : 
+                        JobPlan(Job* req,Job* dep,JobScheduler& jobScheduler) : 
                         reqCount(1),required(new RequiredJob(req,jobScheduler)),jobScheduler(jobScheduler) {
 
                             DependentJob* _dep = new DependentJob(dep);
@@ -353,13 +356,13 @@ namespace jsch{
                             this->lastDep = _dep;
                         }
 
-                        MultiJobSequence(Job* req,JobScheduler& jobScheduler) : reqCount(1),jobScheduler(jobScheduler){
+                        JobPlan(Job* req,JobScheduler& jobScheduler) : reqCount(1),jobScheduler(jobScheduler){
                             RequiredJob* _req = new RequiredJob(req,jobScheduler);
                             this->required = _req;
                             this->lastReq = _req;
                         }
 
-                        virtual ~MultiJobSequence() override {} ;
+                        virtual ~JobPlan() override {} ;
 
                         virtual Future* enableFuture() override {
 
@@ -423,7 +426,7 @@ namespace jsch{
                             return NULL;
                         }
 
-                        MultiJobSequence* addRequirement(Job* job){
+                        JobPlan* addRequirement(Job* job){
                             reqCount++;
                             lastReq->next = new RequiredJob(job,jobScheduler);
                             lastReq = lastReq->next;
@@ -431,7 +434,7 @@ namespace jsch{
                             return this; 
                         }
 
-                        MultiJobSequence* addDependent(Job* job){
+                        JobPlan* addDependent(Job* job){
                             /*Initialize list of dependent jobs */
                             if (dependent == NULL) {
                                 dependent = new DependentJob(job);
@@ -452,11 +455,11 @@ namespace jsch{
                     return new JobSequence(job,*this);
                 }
 
-                MultiJobSequence* makeMultiJobSequence(Job* req,Job* dep){
-                    return new MultiJobSequence(req,dep,*this);
+                JobPlan* makeMultiJobSequence(Job* req,Job* dep){
+                    return new JobPlan(req,dep,*this);
                 }
-                MultiJobSequence* makeMultiJobSequence(Job* req){
-                    return new MultiJobSequence(req,*this);
+                JobPlan* makeMultiJobSequence(Job* req){
+                    return new JobPlan(req,*this);
                 }
     };   
 

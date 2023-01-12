@@ -237,7 +237,7 @@ void PartitionManager::Reorder(uint n_bits,jsch::JobScheduler& jobScheduler) {
         }
     );
 
-    jsch::JobScheduler::MultiJobSequence* multiJobSequence = jobScheduler.makeMultiJobSequence(job1);
+    jsch::JobScheduler::JobPlan* multiJobSequence = jobScheduler.makeMultiJobSequence(job1);
 
     for (int i = 1 ; i < num_threads; i++){
         multiJobSequence->addRequirement(jsch::make_job(
@@ -327,7 +327,7 @@ void PartitionManager::Reorder(uint n_bits,jsch::JobScheduler& jobScheduler) {
     );
 
 
-    jsch::JobScheduler::MultiJobSequence* multiJobSequence2 = jobScheduler.makeMultiJobSequence(job2);  
+    jsch::JobScheduler::JobPlan* multiJobSequence2 = jobScheduler.makeMultiJobSequence(job2);  
 
     //jsch::JobScheduler::MultiJobSequence* multiJobSequence2 = jobScheduler.makeMultiJobSequence(job2);
 

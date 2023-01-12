@@ -107,7 +107,7 @@ Joint::Joint(Column *c1, Column *c2, jsch::JobScheduler& jobScheduler){
         }
     );
 
-    jsch::JobScheduler::MultiJobSequence* multiJobSequence = jobScheduler.makeMultiJobSequence(job1);
+    jsch::JobScheduler::JobPlan* multiJobSequence = jobScheduler.makeMultiJobSequence(job1);
     // Iterate over the partitions
     for (uint i=1; i<pm1.size; i++){
         multiJobSequence->addRequirement(jsch::make_job([&,i]{

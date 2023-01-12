@@ -7,4 +7,7 @@ Different task types :
     Task_1 wants to execute once Task_2 ... Task_n have executed.
     Task_1 wants to execute once Task_2 has executed which is a task that waits on N tasks to execute
 
+TODO:
+    Names of classes need fixing
+
     
