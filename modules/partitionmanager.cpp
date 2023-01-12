@@ -233,7 +233,6 @@ void PartitionManager::Reorder(uint n_bits,jsch::JobScheduler& jobScheduler) {
     
     auto job1 = jsch::make_job(
         [&]{
-            // std::cout << 1 << std::endl;
             CreateHistogram(&args[0]);
         }
     );
@@ -243,7 +242,6 @@ void PartitionManager::Reorder(uint n_bits,jsch::JobScheduler& jobScheduler) {
     for (int i = 1 ; i < num_threads; i++){
         multiJobSequence->addRequirement(jsch::make_job(
             [&,i] {
-                // std::cout << 1 << std::endl;
                 CreateHistogram(&args[i]);
             }
         ));
@@ -265,7 +263,6 @@ void PartitionManager::Reorder(uint n_bits,jsch::JobScheduler& jobScheduler) {
 
     auto job2 = jsch::make_job(
         [&]{
-            // std::cout << 2 << std::endl;
             // Merge histograms
             for (int i=0; i<num_threads; i++){
                 for (int j=0; j<histogram.size; j++){
@@ -352,7 +349,6 @@ void PartitionManager::Reorder(uint n_bits,jsch::JobScheduler& jobScheduler) {
     for (int i=0; i<num_threads; i++){
         multiJobSequence2->addDependent(jsch::make_job(
             [&,i]{
-                // std::cout << 3 << std::endl;
                 CopyTuples(&copy_args[i]);
             }
         ));
@@ -362,6 +358,7 @@ void PartitionManager::Reorder(uint n_bits,jsch::JobScheduler& jobScheduler) {
     jsch::Future* future = jobScheduler.submitJobWithFuture(multiJobSequence);
 
     future->wait();
+
 
     // Destroy locks
     for (uint i=0; i<this->size; i++){
