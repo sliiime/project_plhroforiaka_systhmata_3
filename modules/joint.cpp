@@ -62,7 +62,7 @@ Joint::Joint(Column *c1, Column *c2, jsch::JobScheduler& jobScheduler){
     jsch::JobScheduler::JobPlan* mainPlan = jobScheduler.makeJobPlan();
     // Iterate over the partitions
     for (uint i=0; i<pm1.size; i++){
-        mainPlan->addRequirement(jsch::make_job([&,i]{
+        mainPlan->addRequiredJob(jsch::make_job([&,i]{
             // Pick the smaller partition to make the Hash Table
             uint workerId = i;
 
@@ -110,7 +110,7 @@ Joint::Joint(Column *c1, Column *c2, jsch::JobScheduler& jobScheduler){
         }));   
     }
 
-    mainPlan->addDependent(jsch::make_job(
+    mainPlan->addDependentJob(jsch::make_job(
         [&]{
             uint totalTuples = 0;
             for (uint i = 0 ; i < pm1.size; i++) totalTuples += workerTuples[i].get_size();

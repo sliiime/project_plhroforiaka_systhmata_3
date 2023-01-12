@@ -234,7 +234,7 @@ void PartitionManager::Reorder(uint n_bits,jsch::JobScheduler& jobScheduler) {
     jsch::JobScheduler::JobPlan* mainPlan = jobScheduler.makeJobPlan();
 
     for (int i = 0 ; i < num_threads; i++){
-        mainPlan->addRequirement(jsch::make_job(
+        mainPlan->addRequiredJob(jsch::make_job(
             [&,i] {
                 CreateHistogram(&args[i]);
             }
@@ -259,7 +259,7 @@ void PartitionManager::Reorder(uint n_bits,jsch::JobScheduler& jobScheduler) {
 
     jsch::JobScheduler::JobPlan* sidePlan = jobScheduler.makeJobPlan();  
 
-    sidePlan->addRequirement(
+    sidePlan->addRequiredJob(
         jsch::make_job(
             [&]{
             // Merge histograms
@@ -327,14 +327,14 @@ void PartitionManager::Reorder(uint n_bits,jsch::JobScheduler& jobScheduler) {
 
     // Add dependent jobs
     for (int i=0; i<num_threads; i++){
-        sidePlan->addDependent(jsch::make_job(
+        sidePlan->addDependentJob(jsch::make_job(
             [&,i]{
                 CopyTuples(&copy_args[i]);
             }
         ));
     }
 
-    mainPlan->addDependent(sidePlan);
+    mainPlan->addDependentJob(sidePlan);
     jsch::Future* future = jobScheduler.submitJobWithFuture(mainPlan);
 
     future->wait();

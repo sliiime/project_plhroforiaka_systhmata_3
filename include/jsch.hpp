@@ -22,9 +22,8 @@ namespace jsch{
             bool* complete;
 
             void done(){
-                /*Maybe Ill have to lock the mutex first...*/
-                *complete = true;
                 pthread_mutex_lock(mutex);
+                    *complete = true;
                     pthread_cond_broadcast(cond);
                 pthread_mutex_unlock(mutex);
             }
@@ -45,12 +44,22 @@ namespace jsch{
 
 
         public:
-            ~Future(){ }
+
+            virtual ~Future(){
+                pthread_mutex_destroy(mutex);
+                pthread_cond_destroy(cond);
+
+                delete mutex;
+                delete cond;
+                delete complete;
+
+             }
 
             virtual void wait(){
                 pthread_mutex_lock(mutex);
                     while (! *complete) pthread_cond_wait(cond,mutex);
                 pthread_mutex_unlock(mutex); 
+
             }
     };
 
@@ -71,10 +80,17 @@ namespace jsch{
                 for (size_t i = 0 ; i < MAX_FUTURES; i++) complete[i] = false;
             }
 
+            virtual ~MultiFuture() override{
+                delete[] complete;
+                this->complete = NULL;
+            }
+
             virtual void wait() override {
                 pthread_mutex_lock(mutex);
                     while (!checkDone()) pthread_cond_wait(cond,mutex);
                 pthread_mutex_unlock(mutex);
+                
+                delete this;
             }
 
             bool checkDone(){
@@ -114,7 +130,9 @@ namespace jsch{
 
             void* execute() override {
                 spec();
-                if (future != NULL) future->done();
+                if (future != NULL) {
+                    future->done();
+                }
                 /*find a different return value?*/
                 return NULL;
             }
@@ -287,11 +305,16 @@ namespace jsch{
                             public:
                                 virtual void* execute(){
                                     job->execute();
+                                    delete job;
                                     //Vary mutex 
                                     pthread_mutex_lock(mutex);
                                         *counter = *counter + 1;
                                         if (*counter == total){
-                                            for (DependentJob* trav = dependent; trav != NULL; trav = trav->next) {
+
+                                            DependentJob* next;
+                                            for (DependentJob* trav = dependent; trav != NULL; trav = next) {
+                                                next = trav->next;
+
                                                 jobScheduler.submitJob(trav);
                                             } 
                                         }
@@ -314,6 +337,7 @@ namespace jsch{
                                 }
 
                                 ~RequiredJob() override {}
+
                             private:
                                 Job* job;
 
@@ -346,7 +370,7 @@ namespace jsch{
 
                         JobPlan(JobScheduler& jobScheduler) : totalRequired(0),jobScheduler(jobScheduler) { }
 
-                        virtual ~JobPlan() override {} ;
+                        virtual ~JobPlan() override {} 
 
                         virtual Future* enableFuture() override {
 
@@ -397,7 +421,11 @@ namespace jsch{
                             depTail->next = new DependentJob(cleanupJob);
                             depTail = depTail->next;
 
-                            for (RequiredJob* trav = required; trav != NULL; trav = trav->next){
+                            RequiredJob* next = NULL;
+                            for (RequiredJob* trav = required; trav != NULL; trav = next){
+                                //This is needed in case trav get deleted before the loop restarts
+                                next = trav->next;
+
                                 trav->counter = counter;
                                 trav->total = totalRequired;
                                 trav->dependent = dependent;
@@ -410,7 +438,7 @@ namespace jsch{
                             return NULL;
                         }
 
-                        JobPlan* addRequirement(Job* job){
+                        JobPlan* addRequiredJob(Job* job){
                             totalRequired++;
 
                             if (required == NULL){
@@ -424,7 +452,7 @@ namespace jsch{
                             return this; 
                         }
 
-                        JobPlan* addDependent(Job* job){
+                        JobPlan* addDependentJob(Job* job){
                             /*Initialize list of dependent jobs */
                             if (dependent == NULL) {
                                 dependent = new DependentJob(job);
