@@ -281,7 +281,7 @@ namespace jsch{
                         };
 
                         class RequiredJob : public Job {
-                            
+
                             friend JobPlan;
 
                             public:
@@ -332,35 +332,19 @@ namespace jsch{
 
 
 
-                        size_t reqCount = 0;
+                        size_t totalRequired = 0;
                         
                         RequiredJob* required = NULL;
-                        RequiredJob* lastReq;
+                        RequiredJob* reqTail = NULL;
 
                         DependentJob* dependent = NULL;
-                        DependentJob* lastDep;
+                        DependentJob* depTail = NULL;
 
                         JobScheduler& jobScheduler;
 
                     public:
 
-                        JobPlan(Job* req,Job* dep,JobScheduler& jobScheduler) : 
-                        reqCount(1),required(new RequiredJob(req,jobScheduler)),jobScheduler(jobScheduler) {
-
-                            DependentJob* _dep = new DependentJob(dep);
-                            RequiredJob*  _req = new RequiredJob(req,jobScheduler);
-
-                            this->required = _req;
-                            this->lastReq = _req;
-                            this->dependent = _dep;
-                            this->lastDep = _dep;
-                        }
-
-                        JobPlan(Job* req,JobScheduler& jobScheduler) : reqCount(1),jobScheduler(jobScheduler){
-                            RequiredJob* _req = new RequiredJob(req,jobScheduler);
-                            this->required = _req;
-                            this->lastReq = _req;
-                        }
+                        JobPlan(JobScheduler& jobScheduler) : totalRequired(0),jobScheduler(jobScheduler) { }
 
                         virtual ~JobPlan() override {} ;
 
@@ -410,12 +394,12 @@ namespace jsch{
                             );
 
                             //Need 2 check if dependent->next == NULL
-                            lastDep->next = new DependentJob(cleanupJob);
-                            lastDep = lastDep->next;
+                            depTail->next = new DependentJob(cleanupJob);
+                            depTail = depTail->next;
 
                             for (RequiredJob* trav = required; trav != NULL; trav = trav->next){
                                 trav->counter = counter;
-                                trav->total = reqCount;
+                                trav->total = totalRequired;
                                 trav->dependent = dependent;
                                 trav->mutex = mutex;
                                 jobScheduler.submitJob(trav);
@@ -427,10 +411,16 @@ namespace jsch{
                         }
 
                         JobPlan* addRequirement(Job* job){
-                            reqCount++;
-                            lastReq->next = new RequiredJob(job,jobScheduler);
-                            lastReq = lastReq->next;
-                            
+                            totalRequired++;
+
+                            if (required == NULL){
+                                required = new RequiredJob(job,jobScheduler);
+                                reqTail = required;
+                            }else{
+                                reqTail->next = new RequiredJob(job,jobScheduler);
+                                reqTail = reqTail->next;
+                            }
+
                             return this; 
                         }
 
@@ -438,12 +428,12 @@ namespace jsch{
                             /*Initialize list of dependent jobs */
                             if (dependent == NULL) {
                                 dependent = new DependentJob(job);
-                                lastDep = dependent;
+                                depTail = dependent;
                             }
                             /*or append dependent job to the end of the list*/
                             else {
-                                lastDep->next = new DependentJob(job);
-                                lastDep = lastDep->next;
+                                depTail->next = new DependentJob(job);
+                                depTail = depTail->next;
                             }
 
                             return this; 
@@ -455,11 +445,8 @@ namespace jsch{
                     return new JobSequence(job,*this);
                 }
 
-                JobPlan* makeMultiJobSequence(Job* req,Job* dep){
-                    return new JobPlan(req,dep,*this);
-                }
-                JobPlan* makeMultiJobSequence(Job* req){
-                    return new JobPlan(req,*this);
+                JobPlan* makeJobPlan(){
+                    return new JobPlan(*this);
                 }
     };   
 

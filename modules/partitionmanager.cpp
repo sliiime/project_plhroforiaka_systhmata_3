@@ -230,17 +230,11 @@ void PartitionManager::Reorder(uint n_bits,jsch::JobScheduler& jobScheduler) {
     
     //Set last thread to have the remaining tuples
     args[num_threads-1].size = num_tuples_last_thread;
-    
-    auto job1 = jsch::make_job(
-        [&]{
-            CreateHistogram(&args[0]);
-        }
-    );
 
-    jsch::JobScheduler::JobPlan* multiJobSequence = jobScheduler.makeMultiJobSequence(job1);
+    jsch::JobScheduler::JobPlan* mainPlan = jobScheduler.makeJobPlan();
 
-    for (int i = 1 ; i < num_threads; i++){
-        multiJobSequence->addRequirement(jsch::make_job(
+    for (int i = 0 ; i < num_threads; i++){
+        mainPlan->addRequirement(jsch::make_job(
             [&,i] {
                 CreateHistogram(&args[i]);
             }
@@ -261,8 +255,13 @@ void PartitionManager::Reorder(uint n_bits,jsch::JobScheduler& jobScheduler) {
 
 
 
-    auto job2 = jsch::make_job(
-        [&]{
+
+
+    jsch::JobScheduler::JobPlan* sidePlan = jobScheduler.makeJobPlan();  
+
+    sidePlan->addRequirement(
+        jsch::make_job(
+            [&]{
             // Merge histograms
             for (int i=0; i<num_threads; i++){
                 for (int j=0; j<histogram.size; j++){
@@ -323,39 +322,20 @@ void PartitionManager::Reorder(uint n_bits,jsch::JobScheduler& jobScheduler) {
             }
             // Set last thread to have the remaining tuples
             copy_args[num_threads-1].size = num_tuples_last_thread;
-        }
+        })
     );
 
-
-    jsch::JobScheduler::JobPlan* multiJobSequence2 = jobScheduler.makeMultiJobSequence(job2);  
-
-    //jsch::JobScheduler::MultiJobSequence* multiJobSequence2 = jobScheduler.makeMultiJobSequence(job2);
-
-
-    
-
-
-
-    // ========== Reorder tuples ========== //
-    
-    //// Partition Job ////
-
-    
-
-
-
-
-    // Create threads
+    // Add dependent jobs
     for (int i=0; i<num_threads; i++){
-        multiJobSequence2->addDependent(jsch::make_job(
+        sidePlan->addDependent(jsch::make_job(
             [&,i]{
                 CopyTuples(&copy_args[i]);
             }
         ));
     }
 
-    multiJobSequence->addDependent(multiJobSequence2);
-    jsch::Future* future = jobScheduler.submitJobWithFuture(multiJobSequence);
+    mainPlan->addDependent(sidePlan);
+    jsch::Future* future = jobScheduler.submitJobWithFuture(mainPlan);
 
     future->wait();
 

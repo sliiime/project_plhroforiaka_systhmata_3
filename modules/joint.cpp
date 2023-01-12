@@ -58,59 +58,11 @@ Joint::Joint(Column *c1, Column *c2, jsch::JobScheduler& jobScheduler){
 
 
     Vector<Tuple> workerTuples[pm1.size];
-    auto job1 = jsch::make_job(
-        [&]{
-             // Pick the smaller partition to make the Hash Table
-            uint workerId = 0;
 
-            bool swapped = false;
-            Column *smaller, *larger;
-            Column R = pm1.GetPartition(0);
-            Column S = pm2.GetPartition(0);
-
-            if (R.num_tuples < S.num_tuples){
-                smaller = &R;
-                larger = &S;
-            } else {
-                smaller = &S;
-                larger = &R;
-                swapped = true;
-            }
-
-            // Create a hop table
-            Hoptable ht = Hoptable();
-            for (int i = 0; i < smaller->num_tuples; i++){
-                ht.insert(smaller->tuples[i].payload, smaller->tuples[i].key);
-            }
-                
-            // Iterate over the larger partition
-            for (int i = 0; i < larger->num_tuples; i++){
-
-                // Lookup and create the tuples
-                int key = larger->tuples[i].key;
-                int payload = larger->tuples[i].payload;
-
-                const Vector<uint32_t> *values = ht.lookup(payload);
-                if (values == NULL) continue;
-
-                for (uint j = 0; j < values->get_size(); j++){
-                    // Add tuples to result
-                    Tuple t;
-                    if (swapped) t = Tuple(key, values->get(j));
-                    else         t = Tuple(values->get(j), key);                    
-                    workerTuples[workerId].push(t);
-                }
-            }
-            // Set tuples to null so the destructor doesn't delete them
-            R.tuples = NULL;
-            S.tuples = NULL;
-        }
-    );
-
-    jsch::JobScheduler::JobPlan* multiJobSequence = jobScheduler.makeMultiJobSequence(job1);
+    jsch::JobScheduler::JobPlan* mainPlan = jobScheduler.makeJobPlan();
     // Iterate over the partitions
-    for (uint i=1; i<pm1.size; i++){
-        multiJobSequence->addRequirement(jsch::make_job([&,i]{
+    for (uint i=0; i<pm1.size; i++){
+        mainPlan->addRequirement(jsch::make_job([&,i]{
             // Pick the smaller partition to make the Hash Table
             uint workerId = i;
 
@@ -158,8 +110,7 @@ Joint::Joint(Column *c1, Column *c2, jsch::JobScheduler& jobScheduler){
         }));   
     }
 
-
-    auto job2 = jsch::make_job(
+    mainPlan->addDependent(jsch::make_job(
         [&]{
             uint totalTuples = 0;
             for (uint i = 0 ; i < pm1.size; i++) totalTuples += workerTuples[i].get_size();
@@ -172,13 +123,9 @@ Joint::Joint(Column *c1, Column *c2, jsch::JobScheduler& jobScheduler){
                 for (uint j = 0 ; j < workerTuples[i].get_size(); j++) this->AddTuple(workerTuples[i][j]);
             }            
         }
-    );
-
-    multiJobSequence->addDependent(job2);
-
-    //Calculate total number of tuples, so vector doesn't have to resize 
+    ));
     
-    jsch::Future* future = jobScheduler.submitJobWithFuture(multiJobSequence);
+    jsch::Future* future = jobScheduler.submitJobWithFuture(mainPlan);
     future->wait();
 
 }
