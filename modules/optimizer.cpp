@@ -710,6 +710,11 @@ void Optimizer::Optimize(){
                     Vector<uint> currTree = bestTree.GetBestTree(combination);
                     currTree.push(k);
 
+                    if (currTree.get_size() == 2){
+                        double s = bestTree.GetCost(currTree);
+                        if (s != -1) continue;
+                    }
+
                     // printf("Current tree: ");
                     // currTree.print();
                     
