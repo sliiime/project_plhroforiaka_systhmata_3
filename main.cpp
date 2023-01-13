@@ -50,10 +50,7 @@ int main(){
     // Optimize query order
 
     Optimizer optimizer(&relationPtrs, &queryPtrs);
-
     optimizer.Optimize();
-
-    return 0;
 
     // Execute queries
     auto start = chrono::high_resolution_clock::now();

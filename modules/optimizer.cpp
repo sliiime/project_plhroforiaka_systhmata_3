@@ -137,6 +137,7 @@ Relation* RelationStatistics::GetRelation(){
 
 
 
+
 // ======= BestTree ======= //
 
 int BestTree::hash(Vector<uint> joinIDs){
@@ -235,6 +236,8 @@ void BestTree::Print(){
         printf("  Cost: %f\n", stats[i]->TotalValues(0));
     }
 }
+
+BestTree::~BestTree(){}
 
 
 
@@ -405,7 +408,7 @@ void Optimizer::OptimizeSelfJoin(RelationStatistics *rs, int column1, int column
 
 
 
-RelationStatistics *Optimizer::OptimizeJoin(RelationStatistics *rs1, RelationStatistics *rs2, int column1, int column2){
+RelationStatistics Optimizer::OptimizeJoin(RelationStatistics *rs1, RelationStatistics *rs2, int column1, int column2){
 
     // Create new tuples for each relation
 
@@ -487,7 +490,7 @@ RelationStatistics *Optimizer::OptimizeJoin(RelationStatistics *rs1, RelationSta
     B.TotalValues(column2, B_totalValues);
 
     // Concatenate A and B
-    RelationStatistics *rs = new RelationStatistics(&A, &B);
+    RelationStatistics rs = RelationStatistics(&A, &B);
 
     return rs;
 
@@ -730,7 +733,7 @@ void Optimizer::Optimize(){
                     // rs2->Print();
 
 
-                    RelationStatistics *rs3 = OptimizeJoin(rs1, rs2, combinationColumn, relationColumn);
+                    RelationStatistics rs3 = OptimizeJoin(rs1, rs2, combinationColumn, relationColumn);
 
                     // printf("New stats: ");
                     // currCombination.print();
@@ -740,7 +743,7 @@ void Optimizer::Optimize(){
                     double currCost = bestTree.GetCost(currTree);
 
                     // Get cost of new tree
-                    double newCost = rs3->GetCost();
+                    double newCost = rs3.GetCost();
 
                     // rs3->Print();
 
@@ -754,7 +757,7 @@ void Optimizer::Optimize(){
 
                     // If new tree is better then update best tree
                     if (newCost < currCost || currCost == -1){
-                        bestTree.SetStats(currCombination, rs3);
+                        bestTree.SetStats(currCombination, &rs3);
                         bestTree.SetBestTree(currCombination, currTree);
                     }
                     // bestTree.Print();
@@ -766,6 +769,15 @@ void Optimizer::Optimize(){
 
         Vector<uint> order = bestTree.GetBestTree(joinedIds);
         Vector<PredicateInfo> newPredicates;
+
+        // Add self joins
+        for (uint i=0; i<all_predicates.get_size(); i++){
+            PredicateInfo predicate = all_predicates[i];
+            if (predicate.isSelfJoin()){
+                newPredicates.push(predicate);
+            }
+        }
+
 
         // Override querries
         for (uint i=0; i<predicates.get_size(); i++){

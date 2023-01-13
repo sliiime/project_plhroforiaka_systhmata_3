@@ -76,8 +76,8 @@ Vector<T>::Vector(uint size){
 
 template <typename T>
 Vector<T>::~Vector(){
-    if (this->data != NULL)
-        delete[] this->data;    
+    if (this->data != nullptr)
+        delete[] this->data;
 }
 
 template <typename T>
@@ -185,27 +185,34 @@ void Vector<T>::sort(){
 
 template <typename T>
 Vector<T>& Vector<T>::operator=(const Vector& v){
-    this->size = v.size;
-    this->capacity = v.capacity;
-    this->data = new T[v.capacity];
-
-    for (uint i = 0 ; i < size; i++) this->data[i] = v.data[i];
-
-    return *(this);
+    if(this != &v){ // check for self-assignment
+        // deallocate the current data array
+        delete [] data;
+        // copy the data from v to this vector
+        size = v.size;
+        capacity = v.capacity;
+        data = new T[capacity];
+        for(uint i = 0; i < size; i++)
+            data[i] = v.data[i];
+    }
+    return *this;
 }
 
 template <typename T>
 Vector<T>& Vector<T>::operator=(Vector&& v){
-
-    delete[] this->data;
-    
-    this->size = v.size;
-    this->capacity = v.capacity;
-    this->data = v.data;
-
-    v.data = NULL;
-
-    return (*this);
+    // check for self-assignment
+    if(this != &v){
+        // deallocate the current data array
+        delete [] data;
+        // move data from v to this vector
+        size = v.size;
+        capacity = v.capacity;
+        data = v.data;
+        v.size = 0;
+        v.capacity = 0;
+        v.data = nullptr;
+    }
+    return *this;
 }
 
 template <typename T>
