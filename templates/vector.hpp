@@ -69,7 +69,7 @@ Vector<T>::Vector(){
 
 template <typename T>
 Vector<T>::Vector(uint size){
-    this->size = 0;
+    this->size = size;
     this->capacity = pow2Ceil(size);
     this->data = new T[capacity];
 }

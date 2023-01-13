@@ -18,6 +18,7 @@ private:
     Relation *relation;
     int rowCount;
     int columnCount;
+    double cost;
 
 public:
     // Constructor that creates statistics for a relation
@@ -45,6 +46,7 @@ public:
     int RowCount();
     int ColumnCount();
     Relation* GetRelation();
+    double GetCost();
 
     void Print();
 };
@@ -58,12 +60,12 @@ private:
 
 public:
     Vector<uint> GetBestTree(Vector<uint> orderedIDs);
-    void Initialize(int joinID, RelationStatistics *relStats);
     void SetBestTree(Vector<uint> relationIDs, Vector<uint> orderedIDs);
     static Vector<Vector<uint>> GetCombinations(Vector<uint> ids, int n);
     RelationStatistics *GetStats(Vector<uint> relationIDs);
     double GetCost(Vector<uint> relationIDs);
     void SetStats(Vector<uint> joinIDs, RelationStatistics *relStats);
+    void Print();
 
 };
 

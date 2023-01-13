@@ -58,6 +58,8 @@ RelationStatistics::RelationStatistics(Relation* relation){
         stats.push(columnStatistics);
     }
 
+    this->cost = 0;
+
     
 }
 
@@ -66,6 +68,7 @@ RelationStatistics::RelationStatistics(RelationStatistics *rs){
     this->rowCount = rs->rowCount;
     this->columnCount = rs->columnCount;
     this->stats = rs->stats;
+    this->cost = rs->cost;
 }
 
 RelationStatistics::RelationStatistics(RelationStatistics *rs1, RelationStatistics *rs2){
@@ -76,6 +79,7 @@ RelationStatistics::RelationStatistics(RelationStatistics *rs1, RelationStatisti
     for (int i=0; i<rs2->columnCount; i++){
         this->stats.push(rs2->stats[i]);
     }
+    this->cost = rs1->cost + rs2->cost + rs1->TotalValues(0) + rs2->TotalValues(0);
 }
 
 
@@ -98,16 +102,19 @@ void RelationStatistics::UpperBound(int column, double value){
     stats[column].upperBound = value;
 }
 void RelationStatistics::DistinctValues(int column, double value){
-    stats[column].distinctValues = value;
+    stats[column].distinctValues = std::max(0.01, value);
 }
 void RelationStatistics::TotalValues(int column, double value){
-    stats[column].totalValues = value;
+    stats[column].totalValues = std::max(0.01, value);
 }
 int RelationStatistics::RowCount(){
     return rowCount;
 }
 int RelationStatistics::ColumnCount(){
     return columnCount;
+}
+double RelationStatistics::GetCost(){
+    return cost;
 }
 void RelationStatistics::Print(){
     printf("Relation Statistics (%dx%d):\n", rowCount, columnCount);
@@ -130,11 +137,10 @@ Relation* RelationStatistics::GetRelation(){
 
 
 
-
 // ======= BestTree ======= //
 
 int BestTree::hash(Vector<uint> joinIDs){
-    int hash = 0;
+    int hash = -1;
     for (uint i=0; i<joinIDs.get_size(); i++){
         hash += pow(2, joinIDs[i]);
     }
@@ -144,34 +150,39 @@ int BestTree::hash(Vector<uint> joinIDs){
 
 RelationStatistics *BestTree::GetStats(Vector<uint> joinIDs){
     int hash = BestTree::hash(joinIDs);
+    if (hash >= (int)stats.get_size() || stats[hash] == NULL) return NULL;
     return stats[hash];
 }
 
-Vector<uint> BestTree::GetBestTree(Vector<uint> orderedIDs){
-    int hash = BestTree::hash(orderedIDs);
-    return orderedIDs[hash];
+Vector<uint> BestTree::GetBestTree(Vector<uint> ids){
+    int hash = BestTree::hash(ids);
+    if (hash >= (int)this->orderedIDs.get_size() || hash < 0){
+        ids.print();
+        printf("[ERROR] BestTree::GetBestTree: Hash %d out of bounds. Size of vector: %u\n", hash, this->orderedIDs.get_size());
+        exit(1);
+    }
+    return this->orderedIDs[hash];
 }
 
 void BestTree::SetBestTree(Vector<uint> joinIDs, Vector<uint> orderedIDs){
     int hash = BestTree::hash(joinIDs);
+    if (hash >= (int)this->orderedIDs.get_size() || hash < 0){
+        printf("[ERROR] BestTree::SetBestTree: Hash %d out of bounds. Size of vector: %u\n", hash, this->orderedIDs.get_size());
+        exit(1);
+    }
     this->orderedIDs[hash] = orderedIDs;
-}
-
-void BestTree::Initialize(int relationID, RelationStatistics *relStats){
-    Vector<uint> relationIDs = Vector<uint>(1);
-    relationIDs.set(0, relationID);
-    orderedIDs.push(relationIDs);
-    stats.push(relStats);
 }
 
 void BestTree::SetStats(Vector<uint> joinIDs, RelationStatistics *relStats){
     int index = hash(joinIDs);
+
 
     // Resize Vector if necessary
     while (index >= (int)stats.get_size()){
         stats.push(NULL);
         orderedIDs.push(Vector<uint>());
     }
+
 
     if (stats.get_size() != orderedIDs.get_size()){
         printf("[ERROR] stats and orderedIDs have different sizes (%d vs %d)", stats.get_size(), orderedIDs.get_size());
@@ -184,47 +195,46 @@ void BestTree::SetStats(Vector<uint> joinIDs, RelationStatistics *relStats){
 Vector<Vector<uint>> BestTree::GetCombinations(Vector<uint> ids, int n){
     
     // Create combinations of size n
-
-    Vector<Vector<uint>> combinations = Vector<Vector<uint>>();
-
+    Vector<Vector<uint>> combinations;
     if (n == 1){
         for (uint i=0; i<ids.get_size(); i++){
-            Vector<uint> combination = Vector<uint>(1);
-            combination.set(0, ids[i]);
+            Vector<uint> combination;
+            combination.push(ids[i]);
             combinations.push(combination);
         }
     } else {
         for (uint i=0; i<ids.get_size(); i++){
-            Vector<uint> newIDs = Vector<uint>(ids.get_size()-1);
-            int index = 0;
-            for (uint j=0; j<ids.get_size(); j++){
-                if (j == i) continue;
-                newIDs.set(index, ids[j]);
-                index++;
+            Vector<uint> newIDs;
+            for (uint j=i+1; j<ids.get_size(); j++){
+                newIDs.push(ids[j]);
             }
             Vector<Vector<uint>> newCombinations = GetCombinations(newIDs, n-1);
             for (uint j=0; j<newCombinations.get_size(); j++){
-                Vector<uint> combination = Vector<uint>(n);
-                combination.set(0, ids[i]);
-                for (int k=0; k<n-1; k++){
-                    combination.set(k+1, newCombinations[j][k]);
-                }
-                combinations.push(combination);
+                newCombinations[j].push(ids[i]);
+                combinations.push(newCombinations[j]);
             }
         }
     }
-
     return combinations;
-
 }
 
 double BestTree::GetCost(Vector<uint> joinIDs){
     int index = hash(joinIDs);
-    double cost = stats[index]->TotalValues(0);
+    if (index >= (int)stats.get_size() || stats[index] == NULL) return -1;
+    double cost = stats[index]->GetCost();
     return cost;
 }
 
-
+void BestTree::Print(){
+    printf("\nBestTree:\n");
+    for (uint i=0; i<stats.get_size(); i++){
+        if (stats[i] == NULL) continue;
+        printf("Index %d:\n", i);
+        printf("  BestTree: ");
+        orderedIDs[i].print();
+        printf("  Cost: %f\n", stats[i]->TotalValues(0));
+    }
+}
 
 
 
@@ -238,10 +248,10 @@ double BestTree::GetCost(Vector<uint> joinIDs){
 void Optimizer::OptimizeFilterEqual(RelationStatistics *rs, int column, double value){
 
     // Calculate new statistics for column
-    int A_lowerBound = value;
-    int A_upperBound = value;
-    int A_distinctValues = 1;
-    int A_totalValues;
+    double A_lowerBound = value;
+    double A_upperBound = value;
+    double A_distinctValues = 1;
+    double A_totalValues;
 
 
     if (rs->GetRelation()->columns[column].contains(value)){
@@ -257,13 +267,13 @@ void Optimizer::OptimizeFilterEqual(RelationStatistics *rs, int column, double v
         if (i == column) continue;
 
         // int dA = rs->DistinctValues(column);
-        int dC = rs->DistinctValues(i);
-        int fA = rs->TotalValues(column);
-        int fC = rs->TotalValues(i);
-        int fA_new = A_totalValues;
+        double dC = rs->DistinctValues(i);
+        double fA = rs->TotalValues(column);
+        double fC = rs->TotalValues(i);
+        double fA_new = A_totalValues;
 
-        int C_distinctValues = dC * (1 - pow((1 - fA_new / fA), fC/dC) );
-        int C_totalValues = fA_new;
+        double C_distinctValues = dC * (1 - pow((1 - fA_new / fA), fC/dC) );
+        double C_totalValues = fA_new;
 
         rs->DistinctValues(i, C_distinctValues);
         rs->TotalValues(i, C_totalValues);
@@ -491,7 +501,19 @@ Optimizer::Optimizer(Vector<Relation *> *relations, Vector<QueryInfo *> *queries
 }
 
 Optimizer::~Optimizer(){
-    // TODO [Critical] Free memory
+    // Free memory
+    for (uint i=0; i<allRelationStats->get_size(); i++){
+        delete allRelationStats->get(i);
+    }
+    delete allRelationStats;
+    for (uint i=0; i<allQueryStats->get_size(); i++){
+        Vector<RelationStatistics *> *qs = allQueryStats->get(i);
+        for (uint j=0; j<qs->get_size(); j++){
+            delete qs->get(j);
+        }
+        delete qs;
+    }
+    delete allQueryStats;
 }
 
 
@@ -589,7 +611,7 @@ void Optimizer::Optimize(){
     }
 
 
-    //// Calulate cost tree for each query ////
+    //// Calculate cost tree for each query ////
 
 
     // For each query
@@ -602,24 +624,55 @@ void Optimizer::Optimize(){
         for (uint j=0; j<queryInfo->relationIds.get_size(); j++){
             // Get relation statistics
             RelationStatistics *rs = qs->get(j);
-            bestTree.Initialize(j, rs);
+            Vector<uint> v;
+            v.push(j);
+            bestTree.SetStats(v, rs);
+            bestTree.SetBestTree(v, v);
         }
 
+        Vector<PredicateInfo> all_predicates = queryInfo->predicates;
+        Vector<PredicateInfo> predicates;
+        Vector<uint> joinedIds;
+
+        for (uint p=0; p<all_predicates.get_size(); p++){
+            PredicateInfo predicate = all_predicates[p];
+            if (!predicate.isSelfJoin()){
+                predicates.push(predicate);
+                if (!joinedIds.contains(predicate.left.binding))
+                    joinedIds.push(predicate.left.binding);
+                if (!joinedIds.contains(predicate.right.binding))
+                    joinedIds.push(predicate.right.binding);
+            }
+        }
+
+
+        // Create dummy vector for relation bindings
+        Vector<uint> relationBindings;
+        for (uint j=0; j<queryInfo->relationIds.get_size(); j++){
+            relationBindings.push(j);
+        }
 
         // for j cardinality of join
         for (uint j=1; j<queryInfo->relationIds.get_size(); j++){
             // for each combination of size j
 
-            Vector<Vector<uint>> combinations = BestTree::GetCombinations(queryInfo->relationIds, j);
+            Vector<Vector<uint>> combinations = BestTree::GetCombinations(relationBindings, j);
 
-            for (uint c; c<combinations.get_size(); c++){
+            // printf("Combinations of size %d:\n", j);
+            // for (int i=0; i<combinations.get_size(); i++){
+            //     combinations[i].print();
+            // }
+            // return;
+
+            for (uint c=0; c<combinations.get_size(); c++){
                 Vector<uint> combination = combinations[c];
+
+                if (bestTree.GetStats(combination) == NULL) continue;
 
                 // for each relation not in combination
                 for (uint k=0; k<queryInfo->relationIds.get_size(); k++){
                     if (combination.contains(k)) continue;
 
-                    Vector<PredicateInfo> predicates = queryInfo->predicates;
 
                     // if relation doesn't join with current combination then skip
                     bool connected = false;
@@ -627,13 +680,18 @@ void Optimizer::Optimize(){
                     int relationColumn;
                     for (uint p=0; p<predicates.get_size(); p++){
                         PredicateInfo predicate = predicates[p];
-                        if (combination.contains(predicate.left.binding) && combination.contains(k)){
+
+                        // printf("Predicate:");
+                        // predicate.print();
+                        // printf("\n");
+
+                        if (combination.contains(predicate.left.binding) && k == predicate.right.binding){
                             connected = true;
                             combinationColumn = predicate.left.colId;
                             relationColumn = predicate.right.colId;
                             break;
                         }
-                        else if (combination.contains(predicate.right.binding) && combination.contains(k)){
+                        else if (combination.contains(predicate.right.binding) && k == predicate.left.binding){
                             connected = true;
                             combinationColumn = predicate.right.colId;
                             relationColumn = predicate.left.colId;
@@ -642,44 +700,82 @@ void Optimizer::Optimize(){
                     }
                     if (!connected) continue;
 
+                    // printf("Relation %d joins with combination ", k);
+                    // combination.print();
+
                     // Get current tree
                     Vector<uint> currTree = bestTree.GetBestTree(combination);
                     currTree.push(k);
+
+                    // printf("Current tree: ");
+                    // currTree.print();
                     
                     Vector<uint> currCombination = combination;
                     currCombination.push(k);
 
+                    // printf("Current combination: ");
+                    // currCombination.print();
+
                     // Calculate cost of new tree
                     RelationStatistics *rs1 = bestTree.GetStats(combination);
-                    RelationStatistics *rs2 = bestTree.GetStats(k);
+                    Vector <uint> v;
+                    v.push(k);
+                    RelationStatistics *rs2 = bestTree.GetStats(v);
+
+                    // printf("Combination stats:");
+                    // combination.print();
+                    // rs1->Print();
+                    // printf("Relation stats:");
+                    // v.print();
+                    // rs2->Print();
+
 
                     RelationStatistics *rs3 = OptimizeJoin(rs1, rs2, combinationColumn, relationColumn);
 
-                    // Set stats of new tree
-                    bestTree.SetStats(currCombination, rs3);
+                    // printf("New stats: ");
+                    // currCombination.print();
+                    // rs3->Print();
 
                     // Get cost of current tree
                     double currCost = bestTree.GetCost(currTree);
 
                     // Get cost of new tree
-                    double newCost = bestTree.GetCost(currCombination);
+                    double newCost = rs3->GetCost();
+
+                    // rs3->Print();
+
+                    // printf("Cost of combination ");
+                    // currCombination.print();
+                    // printf(" is %f\n", newCost);
+
+                    // printf("Cost of current tree ");
+                    // currTree.print();
+                    // printf(" is %f\n", currCost);
 
                     // If new tree is better then update best tree
                     if (newCost < currCost || currCost == -1){
+                        bestTree.SetStats(currCombination, rs3);
                         bestTree.SetBestTree(currCombination, currTree);
                     }
-
-
-
+                    // bestTree.Print();
                 }
             }
         }
 
-        // Print best tree
-        std::cout << "Best Tree: ";
-        bestTree.GetBestTree(queryInfo->relationIds).print();
+        // Change query order to match best tree
 
+        Vector<uint> order = bestTree.GetBestTree(joinedIds);
+        Vector<PredicateInfo> newPredicates;
 
+        // Override querries
+        for (uint i=0; i<predicates.get_size(); i++){
+            PredicateInfo predicate = predicates[i];
+            predicate.left.binding = order[i];
+            predicate.right.binding = order[i+1];
+            newPredicates.push(predicate);
+        }
+
+        queryInfo->predicates = newPredicates;
 
     }
 

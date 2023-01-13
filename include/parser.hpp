@@ -82,7 +82,7 @@ struct PredicateInfo {
    PredicateInfo(const PredicateInfo& predicateInfo): left(predicateInfo.left), right(predicateInfo.right){}
    /// 
    inline void print() const {
-      std:: cout << "[" << left.binding << "." << left.colId << " == " << right.binding << "." << right.colId << "]";
+      std:: cout << "[" << left.binding << "." << left.colId << " == " << right.binding << "." << right.colId << "]" << std::endl;
    }
    
    std::string toString() const {
