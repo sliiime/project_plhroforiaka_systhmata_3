@@ -81,7 +81,7 @@ jsch::JobScheduler::~JobScheduler(){
     /*Join threads */
     for (size_t i = 0 ; i < total; i++){
         pthread_join(workers[i],NULL);
-        std::cout << "Joined " << i << std::endl; 
+        // std::cout << "Joined " << i << std::endl; 
     }
     /*Delete workers metadata*/
     delete[] workers;
