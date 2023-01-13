@@ -10,8 +10,10 @@ CC = g++
 # Executable
 EXEC = main
 
+# Optimization
+OPFLAGS = -O3 -march=native
 # Compile options
-CPPFLAGS = -pthread -Wall -g -I $(INCLUDE) -I $(TEMPLATES)
+CPPFLAGS = -pthread -Wall -g -I $(INCLUDE) -I $(TEMPLATES) #$(OPFLAGS)
 
 # Object files
 SRC = $(wildcard $(MODULES)/*.cpp)
