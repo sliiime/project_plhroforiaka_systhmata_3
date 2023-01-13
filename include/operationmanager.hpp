@@ -13,4 +13,6 @@ public:
     ~OperationManager();
     void Execute(QueryInfo *queryInfo);
     void Execute(QueryInfo *queryInfo, jsch::JobScheduler& jobScheduler);
+    Result* ExecuteAndReturn(QueryInfo *queryInfo, jsch::JobScheduler& jobScheduler,const size_t workersPerQuery);
+    void printColumnProjection(Vector<SelectInfo>& selectInfo,Result* result);
 };

@@ -24,7 +24,6 @@ int main(){
     Vector<Relation> relations;
     Vector<QueryInfo> queries;
 
-    jsch::JobScheduler jobScheduler(10);
 
 
 
@@ -35,6 +34,9 @@ int main(){
     std::ifstream in("workloads/small/all.work");
 	Utils::readQueryBatch(in,queries);
 
+    const size_t TOTAL_WORKERS = 6*queries.get_size();
+    jsch::JobScheduler jobScheduler(TOTAL_WORKERS);
+
     // Execute queries
     Vector<Relation*> relationPtrs = Vector<Relation*>();
     for (uint i = 0 ; i < relations.get_size(); i++){
@@ -43,9 +45,37 @@ int main(){
 
     auto start = chrono::high_resolution_clock::now();
     OperationManager operationManager(&relationPtrs);
+
+    jsch::JobScheduler::JobPlan* exec = jobScheduler.makeJobPlan();
+    jsch::JobScheduler::JobSequence* print = jobScheduler.makeJobSequence();
+
+    Result* results[queries.get_size()];
+
+
+
     for (uint i = 0 ; i < queries.get_size(); i++){
-        operationManager.Execute(&queries[i],jobScheduler);
+        //Calculate queries
+        exec->addRequiredJob(
+            jsch::make_job([&,i]{
+                results[i] = operationManager.ExecuteAndReturn(&queries[i],jobScheduler,5);
+            })
+        );
+        //Print results of each query
+        print->then(
+            jsch::make_job([&,i]{
+                operationManager.printColumnProjection(queries[i].selections,results[i]);
+            })
+        );
     }
+
+    exec->addDependentJob(print);
+
+    jsch::Future* future = jobScheduler.submitJobWithFuture(exec);
+    future->wait();
+
+
+    printf("\n");
+    if (DEBUG) printf("\n");
     auto end = chrono::high_resolution_clock::now();
 
     auto duration = chrono::duration_cast<chrono::microseconds>(end - start);

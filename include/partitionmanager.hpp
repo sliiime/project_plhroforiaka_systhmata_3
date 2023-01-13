@@ -27,7 +27,7 @@ public:
     */
     void Reorder(uint);
 
-    void Reorder(uint,jsch::JobScheduler&);
+    void Reorder(uint,jsch::JobScheduler&,const size_t);
 
     /*
     Frees the memory allocated for a partition

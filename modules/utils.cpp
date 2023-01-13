@@ -132,6 +132,7 @@ Vector<PredicateInfo*> Utils::findJoinSequence(Vector<PredicateInfo>& predicates
 }
 
 
+
 Vector<PredicateInfo*> coverAllGraph(const Vector<unsigned int>& nodes,Vector<PredicateInfo>& edges){
     
     const size_t TOTAL_NODES = nodes.get_size();

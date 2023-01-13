@@ -201,14 +201,14 @@ void PartitionManager::Reorder(uint n_bits) {
     
 }
 
-void PartitionManager::Reorder(uint n_bits,jsch::JobScheduler& jobScheduler) {
+void PartitionManager::Reorder(uint n_bits,jsch::JobScheduler& jobScheduler,const size_t workersPerQuery) {
 
     this->size = 1 << n_bits;
 
     //// Histogram Jobs ////
 
     // Devide column into THREADS threads
-    int num_threads = jobScheduler.workersCount();
+    int num_threads = workersPerQuery;
     int num_tuples_per_thread = this->column->num_tuples / num_threads;
     int num_tuples_last_thread = this->column->num_tuples - (num_tuples_per_thread * (num_threads-1));
 
@@ -336,8 +336,8 @@ void PartitionManager::Reorder(uint n_bits,jsch::JobScheduler& jobScheduler) {
 
     mainPlan->addDependentJob(sidePlan);
     jsch::Future* future = jobScheduler.submitJobWithFuture(mainPlan);
-
     future->wait();
+
 
 
     // Destroy locks

@@ -217,6 +217,7 @@ namespace jsch{
                     JobSequence* next = NULL;
                 protected:
                     JobSequence(Job* job,JobScheduler& jobScheduler ) : job(job), jobScheduler(jobScheduler) {}
+                    JobSequence(JobScheduler& jobScheduler) : job(NULL),jobScheduler(jobScheduler) {}
                 public:
 
                     virtual void* execute(){
@@ -255,9 +256,12 @@ namespace jsch{
                     }
 
                     JobSequence* then(Job* job){
-                        JobSequence* trav = this;
-                        while(trav->next != NULL) trav = trav->next;
-                        trav->next = new JobSequence(job,jobScheduler);
+                        if (this->job == NULL) this->job = job;
+                        else{
+                            JobSequence* trav = this;
+                            while(trav->next != NULL) trav = trav->next;
+                            trav->next = new JobSequence(job,jobScheduler);
+                        }
                         return this;
                     }
                 };
@@ -471,6 +475,10 @@ namespace jsch{
 
                 JobSequence* makeJobSequence(Job* job){
                     return new JobSequence(job,*this);
+                }
+
+                JobSequence* makeJobSequence(){
+                    return new JobSequence(*this);
                 }
 
                 JobPlan* makeJobPlan(){

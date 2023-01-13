@@ -19,7 +19,7 @@ private:
 
 public:
     Joint(Column *c1, Column *c2);
-    Joint(Column *c1, Column *c2, jsch::JobScheduler& jobScheduler);
+    Joint(Column *c1, Column *c2, jsch::JobScheduler& jobScheduler,const size_t workersPerQuery);
     ~Joint();
     Tuple GetTuple(int i);
     int GetTupleCount();

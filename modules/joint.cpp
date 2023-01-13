@@ -25,7 +25,7 @@ void Joint::Print(){
 }
 
 
-Joint::Joint(Column *c1, Column *c2, jsch::JobScheduler& jobScheduler){
+Joint::Joint(Column *c1, Column *c2, jsch::JobScheduler& jobScheduler,const size_t workersPerQuery){
 
     // Create Partition Managers
     PartitionManager pm1 = PartitionManager(c1);
@@ -41,8 +41,8 @@ Joint::Joint(Column *c1, Column *c2, jsch::JobScheduler& jobScheduler){
 
     // Pass 1
     if (!fitsInMemory){
-        pm1.Reorder(PASS1_BITS,jobScheduler);
-        pm2.Reorder(PASS1_BITS,jobScheduler);
+        pm1.Reorder(PASS1_BITS,jobScheduler,workersPerQuery);
+        pm2.Reorder(PASS1_BITS,jobScheduler,workersPerQuery);
     }
 
     // Check if the partitions fit in memory
@@ -52,8 +52,8 @@ Joint::Joint(Column *c1, Column *c2, jsch::JobScheduler& jobScheduler){
 
     // Pass 2
     if (!fitsInMemory){
-        pm1.Reorder(PASS2_BITS,jobScheduler);
-        pm2.Reorder(PASS2_BITS,jobScheduler);
+        pm1.Reorder(PASS2_BITS,jobScheduler,workersPerQuery);
+        pm2.Reorder(PASS2_BITS,jobScheduler,workersPerQuery);
     }
 
 
