@@ -32,7 +32,11 @@ int main(){
     
 	//Reads batch of queries and stores them to queries vector
     std::ifstream in("workloads/small/all.work");
-	Utils::readQueryBatch(in,queries);
+    Utils::readQueryBatch(in,queries);
+    /* 
+    std::ifstream inPublic("workloads/public/public.work");
+	Utils::readQueryBatch(inPublic,queries);
+    */
 
     const size_t TOTAL_WORKERS = 6*queries.get_size();
     jsch::JobScheduler jobScheduler(TOTAL_WORKERS);
@@ -73,13 +77,12 @@ int main(){
     jsch::Future* future = jobScheduler.submitJobWithFuture(exec);
     future->wait();
 
-
+    for (uint i = 0; i < queries.get_size(); i++) delete results[i];
     printf("\n");
-    if (DEBUG) printf("\n");
     auto end = chrono::high_resolution_clock::now();
 
     auto duration = chrono::duration_cast<chrono::microseconds>(end - start);
-    std::cout << "Queries with JobScheduler : " << duration.count() << std::endl;
+    std::cout << "Time taken using JobScheduler with multithreading : " << duration.count() << std::endl;
 
     #ifdef BENCHMARK
         start = chrono::high_resolution_clock::now();

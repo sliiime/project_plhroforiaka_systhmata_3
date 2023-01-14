@@ -515,6 +515,7 @@ void OperationManager::Execute(QueryInfo *queryInfo,jsch::JobScheduler& jobSched
             if (DEBUG) printf("[Operation] Joining two already joined relations\n");
             IDVector ids = Filter::FilterPredicate(leftColumn, rightColumn);
             result->SetJoint(ids);
+            delete ids;
         }
         else {
             Joint *joint = new Joint(&leftColumn, &rightColumn,jobScheduler,workersPerQuery);

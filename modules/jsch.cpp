@@ -16,32 +16,12 @@ void* jsch::JobScheduler::work(){
             active[id] = false;
 
             delete job;
-        }
-
-        /*Every time a worker finishes its job, it notifies the waiter,if one exists that the queue is empty*/
-        if (queue.empty() && _waitEnabled ){
-            pthread_mutex_lock(&waitMutex);
-                pthread_cond_broadcast(&waitCond);
-            pthread_mutex_unlock(&waitMutex);
         } 
     }
     /*Find better return value*/
     return NULL;
 }
 
-
-
-void jsch::JobScheduler::wait(){
-    _waitEnabled = true;
-    pthread_mutex_lock(&waitMutex);
-        while (!queue.empty() || !onVacation() || jobsCompleted() != submitted ) {pthread_cond_wait(&waitCond,&waitMutex);}
-    pthread_mutex_unlock(&waitMutex);
-    _waitEnabled = false;
-}
-
-void jsch::JobScheduler::block(){
-    _blocked = true;
-}
 
 size_t jsch::JobScheduler::selfSerialId() const {
     for (size_t i = 0; i < total; i++){
@@ -72,11 +52,9 @@ jsch::JobScheduler::JobScheduler(size_t workersCount): queue(ccqueue<Job*>()),to
 }
 
 void jsch::JobScheduler::submitJob(Job* job){ 
-    if (!_blocked && !_stopped) {
-        submitted++;
+    if (!_stopped) {
         queue.push(job);
-    }
-    else delete job;
+    }else delete job;
 }
 
 jsch::Future* jsch::JobScheduler::submitJobWithFuture(Job* job){

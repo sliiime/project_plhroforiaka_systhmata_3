@@ -124,7 +124,9 @@ namespace jsch{
     template<typename T>
     void  ccqueue<T>::close(){ 
         _closed = true;
-        pthread_cond_broadcast(&cond);
+        pthread_mutex_lock(&mutex);
+            pthread_cond_broadcast(&cond);
+        pthread_mutex_unlock(&mutex);
     }
 }
 

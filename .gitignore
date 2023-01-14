@@ -36,3 +36,4 @@ main
 intergration_test
 output.txt
 .vscode
+workloads/public/*

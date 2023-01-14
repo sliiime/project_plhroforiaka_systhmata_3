@@ -36,10 +36,15 @@ namespace jsch{
             Future(pthread_mutex_t* mutex,pthread_cond_t* cond,bool* complete) : mutex(mutex),cond(cond) , complete(complete)  {}
         
         protected:
+
             Future(bool* complete) : mutex(new pthread_mutex_t),cond(new pthread_cond_t),complete(complete) {
                 pthread_mutex_init(mutex,NULL);
                 pthread_cond_init(cond,NULL);
 
+            }
+
+            virtual bool checkComplete() {
+                return *complete;
             }
 
 
@@ -52,17 +57,16 @@ namespace jsch{
                 delete mutex;
                 delete cond;
                 delete complete;
-
              }
 
             virtual void wait(){
                 pthread_mutex_lock(mutex);
-                    while (! *complete) pthread_cond_wait(cond,mutex);
+                    while (!checkComplete()) pthread_cond_wait(cond,mutex);
                 pthread_mutex_unlock(mutex); 
 
+                delete this;
             }
     };
-
 
     class MultiFuture : public Future {
 
@@ -70,8 +74,6 @@ namespace jsch{
 
             static const size_t MAX_FUTURES = 256;
             
-
-
         public:
 
             size_t totalFutures = 0;
@@ -85,15 +87,8 @@ namespace jsch{
                 this->complete = NULL;
             }
 
-            virtual void wait() override {
-                pthread_mutex_lock(mutex);
-                    while (!checkDone()) pthread_cond_wait(cond,mutex);
-                pthread_mutex_unlock(mutex);
-                
-                delete this;
-            }
-
-            bool checkDone(){
+        protected:
+            virtual bool checkComplete() override{
                 for (size_t i = 0; i < totalFutures; i++){
                     if (!complete[i]) return false;
                 }
@@ -102,6 +97,29 @@ namespace jsch{
 
 
     };
+
+    class Supervisor {
+        private:
+            pthread_mutex_t* mutex;
+            pthread_cond_t* cond;
+            bool* complete;
+        public:
+            Supervisor() : mutex(NULL),cond(NULL),complete(NULL) {}
+            Supervisor(pthread_mutex_t* mutex,pthread_cond_t* cond,bool* complete) : mutex(mutex),cond(cond),complete(complete) {}
+            Supervisor(const Supervisor& s): mutex(s.mutex),cond(s.cond),complete(s.complete) {}
+
+            void checkOut() {
+
+                if (mutex == NULL) return;
+
+                pthread_mutex_lock(mutex);
+                    *complete = true;
+                    pthread_cond_broadcast(cond);
+                pthread_mutex_unlock(mutex);
+            }
+    };
+
+
 
     class Job{
         public:
@@ -112,8 +130,7 @@ namespace jsch{
             virtual Future* enableFuture() = 0;
             virtual void gatherFutures(pthread_mutex_t* mutex,pthread_cond_t* cond,bool* complete,size_t& totalJobs) = 0;
 
-        protected:
-            Future* future = NULL;
+
     };
 
     template<typename S>
@@ -123,6 +140,7 @@ namespace jsch{
         private:
 
             S spec;
+            Supervisor supervisor;
         
         public:
             /*Universal reference*/
@@ -130,20 +148,19 @@ namespace jsch{
 
             void* execute() override {
                 spec();
-                if (future != NULL) {
-                    future->done();
-                }
-                /*find a different return value?*/
+                supervisor.checkOut();
+
                 return NULL;
             }
 
             virtual Future* enableFuture() override {
-                this->future = new Future();
-                return this->future;
+                Future* future = new Future();
+                this->supervisor = Supervisor(future->mutex,future->cond,future->complete);
+                return future;
             }
 
             virtual void gatherFutures(pthread_mutex_t* mutex,pthread_cond_t* cond,bool* complete,size_t& totalFutures) override{
-                this->future = new Future(mutex,cond,complete + totalFutures++);
+                this->supervisor = Supervisor(mutex,cond,complete + totalFutures++);
             }
 
 
@@ -179,8 +196,6 @@ namespace jsch{
                 bool _stopped = false;
                 /*No new jobs can be added*/
                 bool _blocked = false;
-                /*Someone is waiting for the Scheduler to finish*/
-                bool _waitEnabled = false;
                 /*Method used by workers */
                 void* work();
                 /*Mutex and cond used for wait */
@@ -198,8 +213,6 @@ namespace jsch{
                 JobScheduler(size_t workersCount);  
                 ~JobScheduler();
                 /*The job scheduler does not accept new jobs and waits for workers to finish*/
-                void wait();
-                void block();
                 void submitJob(Job* job);
                 Future* submitJobWithFuture(Job* job);
                 size_t workersCount() const;
@@ -223,9 +236,7 @@ namespace jsch{
                     virtual void* execute(){
                         job->execute();
                         if( next != NULL) jobScheduler.submitJob(next);
-                        else {
-                            if (future != NULL) future->done();
-                        }
+
                         /*Find better return value*/
                         return NULL;
                     }
@@ -234,9 +245,9 @@ namespace jsch{
                         JobSequence* trav = this;
                         while (trav->next != NULL) trav = trav -> next;
 
-                        this->future = trav->job->enableFuture();
+                        return trav->job->enableFuture();
                         
-                        return this->future;
+                        
 
                     }
 
@@ -278,13 +289,11 @@ namespace jsch{
                             public:
                                 virtual void* execute(){
                                     job->execute();
-                                    /*Find better return value*/
                                     return NULL;
                                 }
 
                                 virtual Future* enableFuture() override {
-                                    this->future = new Future();
-                                    return this->future;
+                                    assert(false);
                                 }
 
                                 virtual void gatherFutures(pthread_mutex_t* mutex,pthread_cond_t* cond,bool* complete,size_t& totalFutures) override {
@@ -380,14 +389,13 @@ namespace jsch{
 
 
                             MultiFuture* multiFuture = new MultiFuture();
-                            this->future = multiFuture;
 
                             for (DependentJob* trav = dependent; trav != NULL; trav = trav->next){
                                 trav->job->gatherFutures(multiFuture->mutex,multiFuture->cond,multiFuture->complete,multiFuture->totalFutures);
                             }
 
 
-                            return this->future;
+                            return multiFuture;
                             
                         }
 
