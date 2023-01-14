@@ -16,8 +16,7 @@
 #include "jsch.hpp"
 #include <pthread.h>
 #include <chrono>
-
-// #define BENCHMARK
+#include "optimizer.hpp"
 
 int main(){
 
@@ -41,12 +40,24 @@ int main(){
     const size_t TOTAL_WORKERS = 6*queries.get_size();
     jsch::JobScheduler jobScheduler(TOTAL_WORKERS);
 
-    // Execute queries
+    // Create pointers to relations
     Vector<Relation*> relationPtrs = Vector<Relation*>();
     for (uint i = 0 ; i < relations.get_size(); i++){
         relationPtrs.push(&relations[i]);
     }
 
+    // Create pointers to relations
+    Vector<QueryInfo*> queryPtrs = Vector<QueryInfo*>();
+    for (uint i = 0 ; i < queries.get_size(); i++){
+        queryPtrs.push(&queries[i]);
+    }
+
+    // Optimize query order
+
+    Optimizer optimizer(&relationPtrs, &queryPtrs);
+    optimizer.Optimize();
+
+    // Execute queries
     auto start = chrono::high_resolution_clock::now();
     OperationManager operationManager(&relationPtrs);
 
@@ -83,18 +94,6 @@ int main(){
 
     auto duration = chrono::duration_cast<chrono::microseconds>(end - start);
     std::cout << "Time taken using JobScheduler with multithreading : " << duration.count() << std::endl;
-
-    #ifdef BENCHMARK
-        start = chrono::high_resolution_clock::now();
-        OperationManager operationManager2(&relationPtrs);
-        for (uint i = 0 ; i < queries.get_size(); i++){
-            operationManager2.Execute(&queries[i]);
-        }
-        end = chrono::high_resolution_clock::now();
-
-        duration = chrono::duration_cast<chrono::microseconds>(end - start);
-        std::cout << "Queries without JobScheduler : " << duration.count() << std::endl;
-    #endif
 
     return 0;
 

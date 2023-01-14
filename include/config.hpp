@@ -3,5 +3,7 @@
 #define PASS1_BITS 4
 #define PASS2_BITS 8
 
+#define MAX_BOOL_ARRAY_LENGTH 20000000
+
 #define DEBUG 0
 #define THREADS 4
