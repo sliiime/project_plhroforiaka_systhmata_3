@@ -29,9 +29,15 @@ $(EXEC): $(OBJS) $(TMPLTS) $(INCLUDE)/config.hpp $(INCLUDE)/parser.hpp $(INCLUDE
 intergration_test: intergration_test.o $(TMPLTS)
 	$(CC) intergration_test.o -o intergration_test
 
+js_test: js_test.o $(MODULE_OBJS)
+	$(CC) $(CPPFLAGS) $^ -o $@
+
+js_test.o: js_test.cpp
+	$(CC) $(CPPFLAGS) -c js_test.cpp  
+
 $(MODULE_OBJS): $(BINARIES)/%.o : $(MODULES)/%.cpp
 	mkdir -p $(BINARIES)
-	$(CC) -c $< $(CPPFLAGS) -o $@
+	$(CC) $(CPPFLAGS) -c $<  -o $@
   
 clean:
 	rm -f $(BINARIES)/* $(EXEC) $(EXEC).o intergration_test output.txt
