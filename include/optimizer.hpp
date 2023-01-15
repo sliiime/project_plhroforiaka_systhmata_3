@@ -81,7 +81,7 @@ private:
     void OptimizeFilterEqual(RelationStatistics *rs, int column, double value);
     RelationStatistics OptimizeFilterLessGreater(RelationStatistics *rs, int column, double value, bool less, bool inplace);
     void OptimizeSelfJoin(RelationStatistics *rs, int column1, int column2);
-    RelationStatistics OptimizeJoin(RelationStatistics *rs1, RelationStatistics *rs2, int column1, int column2);
+    RelationStatistics *OptimizeJoin(RelationStatistics *rs1, RelationStatistics *rs2, int column1, int column2);
 
 public:
     Optimizer(Vector<Relation*> *relations, Vector<QueryInfo *> *queries);

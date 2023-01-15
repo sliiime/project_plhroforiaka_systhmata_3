@@ -228,12 +228,13 @@ double BestTree::GetCost(Vector<uint> joinIDs){
 
 void BestTree::Print(){
     printf("\nBestTree:\n");
+    printf("  Size: %d\n", stats.get_size());
     for (uint i=0; i<stats.get_size(); i++){
         if (stats[i] == NULL) continue;
         printf("Index %d:\n", i);
         printf("  BestTree: ");
         orderedIDs[i].print();
-        printf("  Cost: %f\n", stats[i]->TotalValues(0));
+        printf("  Cost: %f\n", stats[i]->GetCost());
     }
 }
 
@@ -254,7 +255,7 @@ void Optimizer::OptimizeFilterEqual(RelationStatistics *rs, int column, double v
     double A_lowerBound = value;
     double A_upperBound = value;
     double A_distinctValues = 1;
-    double A_totalValues;
+    double A_totalValues = 0;
 
 
     if (rs->GetRelation()->columns[column].contains(value)){
@@ -262,7 +263,6 @@ void Optimizer::OptimizeFilterEqual(RelationStatistics *rs, int column, double v
     } else {
         A_totalValues = 0;
     }
-
 
 
     // Caclulate new statistics for other columns
@@ -289,7 +289,6 @@ void Optimizer::OptimizeFilterEqual(RelationStatistics *rs, int column, double v
     rs->UpperBound(column, A_upperBound);
     rs->DistinctValues(column, A_distinctValues);
     rs->TotalValues(column, A_totalValues);
-
 }
 
 RelationStatistics Optimizer::OptimizeFilterLessGreater(RelationStatistics *rs, int column, double value, bool less, bool inplace=true){
@@ -408,7 +407,7 @@ void Optimizer::OptimizeSelfJoin(RelationStatistics *rs, int column1, int column
 
 
 
-RelationStatistics Optimizer::OptimizeJoin(RelationStatistics *rs1, RelationStatistics *rs2, int column1, int column2){
+RelationStatistics *Optimizer::OptimizeJoin(RelationStatistics *rs1, RelationStatistics *rs2, int column1, int column2){
 
     // Create new tuples for each relation
 
@@ -490,7 +489,7 @@ RelationStatistics Optimizer::OptimizeJoin(RelationStatistics *rs1, RelationStat
     B.TotalValues(column2, B_totalValues);
 
     // Concatenate A and B
-    RelationStatistics rs = RelationStatistics(&A, &B);
+    RelationStatistics *rs = new RelationStatistics(&A, &B);
 
     return rs;
 
@@ -500,7 +499,7 @@ Optimizer::Optimizer(Vector<Relation *> *relations, Vector<QueryInfo *> *queries
     this->relations = relations;
     this->queries = queries;
     this->allRelationStats = new Vector<RelationStatistics *>();
-    this->allQueryStats = new Vector<Vector<RelationStatistics *> *>();
+    // this->allQueryStats = new Vector<Vector<RelationStatistics *> *>();
 }
 
 Optimizer::~Optimizer(){
@@ -509,14 +508,14 @@ Optimizer::~Optimizer(){
         delete allRelationStats->get(i);
     }
     delete allRelationStats;
-    for (uint i=0; i<allQueryStats->get_size(); i++){
-        Vector<RelationStatistics *> *qs = allQueryStats->get(i);
-        for (uint j=0; j<qs->get_size(); j++){
-            delete qs->get(j);
-        }
-        delete qs;
-    }
-    delete allQueryStats;
+    // for (uint i=0; i<allQueryStats->get_size(); i++){
+    //     Vector<RelationStatistics *> *qs = allQueryStats->get(i);
+    //     for (uint j=0; j<qs->get_size(); j++){
+    //         delete qs->get(j);
+    //     }
+    //     delete qs;
+    // }
+    // delete allQueryStats;
 }
 
 
@@ -553,16 +552,8 @@ void Optimizer::Optimize(){
             RelationStatistics *rs = new RelationStatistics(allRelationStats->get(relationId));
             qs->push(rs);
         }
-        
-        // Add query statistics to vector
-        allQueryStats->push(qs);
-
-    }
 
     //// Optimize each query
-    for (uint i=0; i<queries->get_size(); i++){
-        QueryInfo *queryInfo = queries->get(i);
-        Vector<RelationStatistics *> *qs = allQueryStats->get(i);
 
         // Optimize each filter
         for (uint j=0; j<queryInfo->filters.get_size(); j++){
@@ -572,6 +563,7 @@ void Optimizer::Optimize(){
 
             // Get relation statistics
             RelationStatistics *rs = qs->get(filterInfo.filterColumn.binding);
+
 
             // Optimize filter A = k
             if (filterInfo.comparison == FilterInfo::Equal){
@@ -586,14 +578,8 @@ void Optimizer::Optimize(){
                 OptimizeFilterLessGreater(rs, filterInfo.filterColumn.colId, filterInfo.constant, false);
             }
         }
-    }
 
     //// Optimize self joins
-
-    // For each query
-    for (uint i=0; i<queries->get_size(); i++){
-        QueryInfo *queryInfo = queries->get(i);
-        Vector<RelationStatistics *> *qs = allQueryStats->get(i);
 
         // Optimize each join
         for (uint j=0; j<queryInfo->predicates.get_size(); j++){
@@ -611,18 +597,11 @@ void Optimizer::Optimize(){
         
         }
 
-    }
-
 
     //// Calculate cost tree for each query ////
 
-
-    // For each query
-    for (uint i=0; i<queries->get_size(); i++){
-        QueryInfo *queryInfo = queries->get(i);
-        Vector<RelationStatistics *> *qs = allQueryStats->get(i);
-
         BestTree bestTree;
+        Vector<RelationStatistics*> extraRS;
 
         for (uint j=0; j<queryInfo->relationIds.get_size(); j++){
             // Get relation statistics
@@ -712,7 +691,7 @@ void Optimizer::Optimize(){
 
                     if (currTree.get_size() == 2){
                         double s = bestTree.GetCost(currTree);
-                        if (s != -1) continue;
+                        if (s != -1) continue;  
                     }
 
                     // printf("Current tree: ");
@@ -731,14 +710,13 @@ void Optimizer::Optimize(){
                     RelationStatistics *rs2 = bestTree.GetStats(v);
 
                     // printf("Combination stats:");
-                    // combination.print();
-                    // rs1->Print();
                     // printf("Relation stats:");
                     // v.print();
                     // rs2->Print();
 
-
-                    RelationStatistics rs3 = OptimizeJoin(rs1, rs2, combinationColumn, relationColumn);
+                    
+                    RelationStatistics *rs3 = OptimizeJoin(rs1, rs2, combinationColumn, relationColumn);
+                    extraRS.push(rs3);
 
                     // printf("New stats: ");
                     // currCombination.print();
@@ -748,7 +726,7 @@ void Optimizer::Optimize(){
                     double currCost = bestTree.GetCost(currTree);
 
                     // Get cost of new tree
-                    double newCost = rs3.GetCost();
+                    double newCost = rs3->GetCost();
 
                     // rs3->Print();
 
@@ -762,7 +740,7 @@ void Optimizer::Optimize(){
 
                     // If new tree is better then update best tree
                     if (newCost < currCost || currCost == -1){
-                        bestTree.SetStats(currCombination, &rs3);
+                        bestTree.SetStats(currCombination, rs3);
                         bestTree.SetBestTree(currCombination, currTree);
                     }
                     // bestTree.Print();
@@ -793,6 +771,15 @@ void Optimizer::Optimize(){
         }
 
         queryInfo->predicates = newPredicates;
+
+        for (uint j=0; j<qs->get_size(); j++){
+            delete qs->get(j);
+        }
+        delete qs;
+
+        for (uint j=0; j<extraRS.get_size(); j++){
+            delete extraRS[j];
+        }
 
     }
 
