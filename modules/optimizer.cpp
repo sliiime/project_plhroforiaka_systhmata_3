@@ -155,23 +155,28 @@ RelationStatistics *BestTree::GetStats(Vector<uint> joinIDs){
     return stats[hash];
 }
 
-Vector<uint> BestTree::GetBestTree(Vector<uint> ids){
+Vector<PredicateInfo *> BestTree::GetPredicateOrder(Vector<uint> ids){
     int hash = BestTree::hash(ids);
     if (hash >= (int)this->orderedIDs.get_size() || hash < 0){
         ids.print();
         printf("[ERROR] BestTree::GetBestTree: Hash %d out of bounds. Size of vector: %u\n", hash, this->orderedIDs.get_size());
         exit(1);
     }
-    return this->orderedIDs[hash];
+    return this->orderedPredicates[hash];
 }
 
-void BestTree::SetBestTree(Vector<uint> joinIDs, Vector<uint> orderedIDs){
+void BestTree::SetBestTree(Vector<uint> joinIDs, Vector<uint> orderedIDs, Vector<PredicateInfo *> *predInfo){
     int hash = BestTree::hash(joinIDs);
     if (hash >= (int)this->orderedIDs.get_size() || hash < 0){
         printf("[ERROR] BestTree::SetBestTree: Hash %d out of bounds. Size of vector: %u\n", hash, this->orderedIDs.get_size());
         exit(1);
     }
     this->orderedIDs[hash] = orderedIDs;
+
+    // Add predicates to predicate list
+    if (predInfo == NULL) return;
+    this->orderedPredicates[hash] = *predInfo;
+
 }
 
 void BestTree::SetStats(Vector<uint> joinIDs, RelationStatistics *relStats){
@@ -182,6 +187,7 @@ void BestTree::SetStats(Vector<uint> joinIDs, RelationStatistics *relStats){
     while (index >= (int)stats.get_size()){
         stats.push(NULL);
         orderedIDs.push(Vector<uint>());
+        orderedPredicates.push(Vector<PredicateInfo*>());
     }
 
 
@@ -235,6 +241,11 @@ void BestTree::Print(){
         printf("  BestTree: ");
         orderedIDs[i].print();
         printf("  Cost: %f\n", stats[i]->GetCost());
+        printf("  Predicates:\n");
+        for (uint j=0; j<orderedPredicates[i].get_size(); j++){
+            printf("    ");
+            orderedPredicates[i][j]->print();
+        }
     }
 }
 
@@ -609,21 +620,21 @@ void Optimizer::Optimize(){
             Vector<uint> v;
             v.push(j);
             bestTree.SetStats(v, rs);
-            bestTree.SetBestTree(v, v);
+            bestTree.SetBestTree(v, v, NULL);
         }
 
         Vector<PredicateInfo> all_predicates = queryInfo->predicates;
-        Vector<PredicateInfo> predicates;
+        Vector<PredicateInfo*> predicates;
         Vector<uint> joinedIds;
 
         for (uint p=0; p<all_predicates.get_size(); p++){
-            PredicateInfo predicate = all_predicates[p];
-            if (!predicate.isSelfJoin()){
+            PredicateInfo *predicate = &all_predicates[p];
+            if (!predicate->isSelfJoin()){
                 predicates.push(predicate);
-                if (!joinedIds.contains(predicate.left.binding))
-                    joinedIds.push(predicate.left.binding);
-                if (!joinedIds.contains(predicate.right.binding))
-                    joinedIds.push(predicate.right.binding);
+                if (!joinedIds.contains(predicate->left.binding))
+                    joinedIds.push(predicate->left.binding);
+                if (!joinedIds.contains(predicate->right.binding))
+                    joinedIds.push(predicate->right.binding);
             }
         }
 
@@ -658,26 +669,34 @@ void Optimizer::Optimize(){
 
                     // if relation doesn't join with current combination then skip
                     bool connected = false;
-                    int combinationColumn;
-                    int relationColumn;
+
+
+                    struct JoinPredicate{
+                        PredicateInfo *predicate;
+                        int combinationColumn;
+                        int relationColumn;
+                    };
+                    Vector<JoinPredicate> joinPredicates;
+
                     for (uint p=0; p<predicates.get_size(); p++){
-                        PredicateInfo predicate = predicates[p];
+                        JoinPredicate jp;
+                        jp.predicate = predicates[p];
 
                         // printf("Predicate:");
                         // predicate.print();
                         // printf("\n");
 
-                        if (combination.contains(predicate.left.binding) && k == predicate.right.binding){
+                        if (combination.contains(jp.predicate->left.binding) && k == jp.predicate->right.binding){
                             connected = true;
-                            combinationColumn = predicate.left.colId;
-                            relationColumn = predicate.right.colId;
-                            break;
+                            jp.combinationColumn = jp.predicate->left.colId;
+                            jp.relationColumn = jp.predicate->right.colId;
+                            joinPredicates.push(jp);
                         }
-                        else if (combination.contains(predicate.right.binding) && k == predicate.left.binding){
+                        else if (combination.contains(jp.predicate->right.binding) && k == jp.predicate->left.binding){
                             connected = true;
-                            combinationColumn = predicate.right.colId;
-                            relationColumn = predicate.left.colId;
-                            break;
+                            jp.combinationColumn = jp.predicate->right.colId;
+                            jp.relationColumn = jp.predicate->left.colId;
+                            joinPredicates.push(jp);
                         }
                     }
                     if (!connected) continue;
@@ -685,8 +704,14 @@ void Optimizer::Optimize(){
                     // printf("Relation %d joins with combination ", k);
                     // combination.print();
 
+                    // printf("Join predicates:\n");
+                    // for (uint p=0; p<joinPredicates.get_size(); p++){
+                    //     joinPredicates[p].predicate->print();
+                    // }
+
                     // Get current tree
-                    Vector<uint> currTree = bestTree.GetBestTree(combination);
+                    // Vector<uint> currTree = bestTree.GetBestTree(combination);
+                    Vector<uint> currTree = combination;
                     currTree.push(k);
 
                     if (currTree.get_size() == 2){
@@ -715,7 +740,38 @@ void Optimizer::Optimize(){
                     // rs2->Print();
 
                     
-                    RelationStatistics *rs3 = OptimizeJoin(rs1, rs2, combinationColumn, relationColumn);
+                    // Join all predicates in joinPredicates
+                    // Copy joinPredicates to a list
+                    List<JoinPredicate*> joinPredicatesList;
+                    for (uint p=0; p<joinPredicates.get_size(); p++){
+                        joinPredicatesList.push(&joinPredicates[p]);
+                    }
+
+                    Vector<PredicateInfo *> predicateOrder = bestTree.GetPredicateOrder(combination);
+                    RelationStatistics *rs3;
+                    while (joinPredicatesList.get_size() > 0){
+                        JoinPredicate *bestJP;
+                        double min_cost = -1;
+                        for (ListNode<JoinPredicate*> *node = joinPredicatesList.begin(); node != NULL; node = node->get_next()){
+                            JoinPredicate *jp = node->get_value();
+                            RelationStatistics *rs3 = OptimizeJoin(rs1, rs2, jp->combinationColumn, jp->relationColumn);
+
+                            double cost = rs3->GetCost();
+
+                            if (cost < min_cost || min_cost == -1){
+                                min_cost = cost;
+                                bestJP = jp;
+                            }
+                        }
+                        joinPredicatesList.remove(bestJP);
+                        rs3 = OptimizeJoin(rs1, rs2, bestJP->combinationColumn, bestJP->relationColumn);
+                        rs1 = rs3;
+                        predicateOrder.push(bestJP->predicate);
+
+                    }
+
+
+                    // RelationStatistics *rs3 = OptimizeJoin(rs1, rs2, combinationColumn, relationColumn);
                     extraRS.push(rs3);
 
                     // printf("New stats: ");
@@ -741,16 +797,17 @@ void Optimizer::Optimize(){
                     // If new tree is better then update best tree
                     if (newCost < currCost || currCost == -1){
                         bestTree.SetStats(currCombination, rs3);
-                        bestTree.SetBestTree(currCombination, currTree);
+                        bestTree.SetBestTree(currCombination, currTree, &predicateOrder);
                     }
-                    // bestTree.Print();
+                    
+
                 }
             }
         }
 
+
         // Change query order to match best tree
 
-        Vector<uint> order = bestTree.GetBestTree(joinedIds);
         Vector<PredicateInfo> newPredicates;
 
         // Add self joins
@@ -760,16 +817,15 @@ void Optimizer::Optimize(){
                 newPredicates.push(predicate);
             }
         }
+        // print predicate order
 
-
-        // Override querries
-        for (uint i=0; i<predicates.get_size(); i++){
-            PredicateInfo predicate = predicates[i];
-            predicate.left.binding = order[i];
-            predicate.right.binding = order[i+1];
-            newPredicates.push(predicate);
+        Vector<PredicateInfo *> predicateOrder = bestTree.GetPredicateOrder(joinedIds);
+        // Add join predicates
+        for (uint i=0; i<predicateOrder.get_size(); i++){
+            newPredicates.push(*predicateOrder[i]);
         }
 
+        // Override queries
         queryInfo->predicates = newPredicates;
 
         for (uint j=0; j<qs->get_size(); j++){

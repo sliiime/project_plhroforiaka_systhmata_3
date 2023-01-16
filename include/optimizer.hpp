@@ -4,6 +4,7 @@
 #include "vector.hpp"
 #include "config.hpp"
 #include "parser.hpp"
+#include "list.hpp"
 
 struct ColumnStatistics{
     double lowerBound;
@@ -56,12 +57,13 @@ class BestTree{
 private:
     Vector<RelationStatistics*> stats;
     Vector<Vector<uint>> orderedIDs;
+    Vector<Vector<PredicateInfo *>> orderedPredicates;
     int hash(Vector<uint> relationIDs);
 
 public:
     ~BestTree();
-    Vector<uint> GetBestTree(Vector<uint> orderedIDs);
-    void SetBestTree(Vector<uint> relationIDs, Vector<uint> orderedIDs);
+    Vector<PredicateInfo *> GetPredicateOrder(Vector<uint> orderedIDs);
+    void SetBestTree(Vector<uint> joinIDs, Vector<uint> orderedIDs, Vector<PredicateInfo *> *predInfo);
     static Vector<Vector<uint>> GetCombinations(Vector<uint> ids, int n);
     RelationStatistics *GetStats(Vector<uint> relationIDs);
     double GetCost(Vector<uint> relationIDs);
@@ -76,7 +78,6 @@ private:
     Vector<Relation *> *relations;
     Vector<QueryInfo *> *queries;
     Vector<RelationStatistics *> *allRelationStats;
-    Vector< Vector<RelationStatistics*> *> *allQueryStats;
 
     void OptimizeFilterEqual(RelationStatistics *rs, int column, double value);
     RelationStatistics OptimizeFilterLessGreater(RelationStatistics *rs, int column, double value, bool less, bool inplace);
