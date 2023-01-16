@@ -133,6 +133,40 @@ namespace jsch{
 
     };
 
+    class LinkedJobWrapper : public Job {
+        private:
+            Job* job;
+            LinkedJobWrapper* next;
+        public:
+            LinkedJobWrapper(Job* job,LinkedJobWrapper* next = NULL) : job(job),next(next) {}
+
+            LinkedJobWrapper* getNext() {
+                return next;
+            }
+
+            void setNext(LinkedJobWrapper* next){
+                this->next = next;
+            }
+
+            virtual void* execute() override {
+                job->execute();
+                return NULL;
+            }
+
+            virtual ~LinkedJobWrapper() override{
+                delete job;
+            }
+
+            virtual Future* enableFuture() override {
+                assert(false && "enableFuture LinkedJobWrapper");
+            }
+
+            virtual void gatherFutures(pthread_mutex_t* mutex, pthread_cond_t* cond, bool* complete, size_t& totalJobs){
+                job->gatherFutures(mutex,cond,complete,totalJobs);
+            }
+
+    };
+
     template<typename S>
     class JobSpecification : public Job {
 
@@ -284,33 +318,6 @@ namespace jsch{
 
                     private :
 
-                        class DependentJob : public Job {
-                            friend JobPlan;
-                            public:
-                                virtual void* execute(){
-                                    job->execute();
-                                    return NULL;
-                                }
-
-                                virtual Future* enableFuture() override {
-                                    assert(false);
-                                }
-
-                                virtual void gatherFutures(pthread_mutex_t* mutex,pthread_cond_t* cond,bool* complete,size_t& totalFutures) override {
-                                    this->job->gatherFutures(mutex,cond,complete,totalFutures);
-                                }
-
-                                virtual ~DependentJob() override {
-                                    delete job;
-                                }
-
-                            private:
-                                Job* job;
-                                DependentJob* next = NULL;
-                                DependentJob(Job* job) : job(job) {}
-
-                        };
-
                         class RequiredJob : public Job {
 
                             friend JobPlan;
@@ -324,10 +331,9 @@ namespace jsch{
                                         *counter = *counter + 1;
                                         if (*counter == total){
 
-                                            DependentJob* next;
-                                            for (DependentJob* trav = dependent; trav != NULL; trav = next) {
-                                                next = trav->next;
-
+                                            LinkedJobWrapper* next;
+                                            for (LinkedJobWrapper* trav = dependent; trav != NULL; trav = next) {
+                                                next = trav->getNext();
                                                 jobScheduler.submitJob(trav);
                                             } 
                                         }
@@ -355,10 +361,13 @@ namespace jsch{
                                 Job* job;
 
                                 pthread_mutex_t* mutex;
+
+                                /*Counter of required jobs that have been executed*/
                                 size_t* counter;
 
+                                /*Total required jobs that must be executed*/
                                 size_t total;
-                                DependentJob* dependent = NULL;
+                                LinkedJobWrapper* dependent = NULL;
                                 RequiredJob* next = NULL;
 
                                 JobScheduler& jobScheduler;
@@ -374,8 +383,8 @@ namespace jsch{
                         RequiredJob* required = NULL;
                         RequiredJob* reqTail = NULL;
 
-                        DependentJob* dependent = NULL;
-                        DependentJob* depTail = NULL;
+                        LinkedJobWrapper* dependent = NULL;
+                        LinkedJobWrapper* depTail = NULL;
 
                         JobScheduler& jobScheduler;
 
@@ -390,8 +399,8 @@ namespace jsch{
 
                             MultiFuture* multiFuture = new MultiFuture();
 
-                            for (DependentJob* trav = dependent; trav != NULL; trav = trav->next){
-                                trav->job->gatherFutures(multiFuture->mutex,multiFuture->cond,multiFuture->complete,multiFuture->totalFutures);
+                            for (LinkedJobWrapper* trav = dependent; trav != NULL; trav = trav->getNext()){
+                                trav->gatherFutures(multiFuture->mutex,multiFuture->cond,multiFuture->complete,multiFuture->totalFutures);
                             }
 
 
@@ -400,9 +409,9 @@ namespace jsch{
                         }
 
                         virtual void gatherFutures(pthread_mutex_t* mutex,pthread_cond_t* cond,bool* complete,size_t& totalFutures) override{
-                                for (DependentJob* trav = dependent; trav != NULL; trav = trav->next){
+                                for (LinkedJobWrapper* trav = dependent; trav != NULL; trav = trav->getNext()){
                                     //Only reason this will work is because DependentJob is a list node wrapper
-                                    trav->job->gatherFutures(mutex,cond,complete,totalFutures);
+                                    trav->gatherFutures(mutex,cond,complete,totalFutures);
                                 }
                         }
 
@@ -430,8 +439,8 @@ namespace jsch{
                             );
 
                             //Need 2 check if dependent->next == NULL
-                            depTail->next = new DependentJob(cleanupJob);
-                            depTail = depTail->next;
+                            depTail->setNext(new LinkedJobWrapper(cleanupJob));
+                            depTail = depTail->getNext();
 
                             RequiredJob* next = NULL;
                             for (RequiredJob* trav = required; trav != NULL; trav = next){
@@ -467,13 +476,13 @@ namespace jsch{
                         JobPlan* addDependentJob(Job* job){
                             /*Initialize list of dependent jobs */
                             if (dependent == NULL) {
-                                dependent = new DependentJob(job);
+                                dependent = new LinkedJobWrapper(job);
                                 depTail = dependent;
                             }
                             /*or append dependent job to the end of the list*/
                             else {
-                                depTail->next = new DependentJob(job);
-                                depTail = depTail->next;
+                                depTail->setNext(new LinkedJobWrapper(job));
+                                depTail = depTail->getNext();
                             }
 
                             return this; 

@@ -37,7 +37,7 @@ int main(){
 	Utils::readQueryBatch(inPublic,queries);
     */
 
-    const size_t TOTAL_WORKERS = 6*queries.get_size();
+    const size_t TOTAL_WORKERS = queries.get_size()*4;
     jsch::JobScheduler jobScheduler(TOTAL_WORKERS);
 
     // Create pointers to relations
@@ -72,7 +72,7 @@ int main(){
         //Calculate queries
         exec->addRequiredJob(
             jsch::make_job([&,i]{
-                results[i] = operationManager.ExecuteAndReturn(&queries[i],jobScheduler,5);
+                results[i] = operationManager.ExecuteAndReturn(&queries[i],jobScheduler,3);
             })
         );
         //Print results of each query
