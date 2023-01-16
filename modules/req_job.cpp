@@ -10,14 +10,28 @@ RequiredJob::RequiredJob(Job* job, pthread_mutex_t* mutex, size_t* counter,size_
 void* RequiredJob::execute(){
         job->execute();
         delete job;
+
+        assert(dependent != NULL);
         pthread_mutex_lock(mutex);
-        *executed = *executed + 1;
+            *executed = *executed + 1;
         if (*executed == *total){
-            LinkedJobWrapper* next;
-            for (LinkedJobWrapper* trav = dependent; trav != NULL; trav = next) {
-                next = trav->getNext();
-                jobScheduler.submitJob(trav);
-            } 
+
+            switch (dependent->getType()){
+
+                case JOB_SEQ:
+
+                    jobScheduler.submitJob(dependent);
+                    break;
+
+                default:
+
+                    LinkedJobWrapper* next;
+                    for (LinkedJobWrapper* trav = dependent; trav != NULL; trav = next) {
+                        next = trav->getNext();
+                        jobScheduler.submitJob(trav);
+                    } 
+                    break;
+            }
         }
         pthread_mutex_unlock(mutex);
         /*Find better return value*/

@@ -12,11 +12,18 @@ void* JobSequence::execute(){
     pthread_mutex_t* mutexes = new pthread_mutex_t[size];
     size_t* executed = new size_t[size];
     size_t* total = new size_t[size];
+    
+    for (int i = 0; i < size; i++){
+        pthread_mutex_init(mutexes+i,NULL);
+        executed[i] = 0;
+        total[i] = 0;
+    }
 
     size_t i = 0;
     size_t sSize = size;
+
     Job* cleanup = jsch::make_job(
-            [&,sSize]{
+            [=]() mutable {
                 for (size_t j = 0; j < sSize; j++){
 
                     pthread_mutex_lock(mutexes+j);
@@ -30,7 +37,7 @@ void* JobSequence::execute(){
                 delete[] total;
             });
 
-    assert(tail != NULL);
+    assert(tail != NULL && head != NULL);
 
     tail->setNext(new LinkedJobWrapper(cleanup));
     tail = tail->getNext();                        
@@ -66,10 +73,10 @@ JobSequence* JobSequence::then(Job* job){
     size++;
 
     if (head == NULL) {
-        head = new LinkedJobWrapper(job);
+        head = new LinkedJobWrapper(job,NULL,JOB_SEQ);
         tail = head;
     }else{
-        tail->setNext(new LinkedJobWrapper(job));
+        tail->setNext(new LinkedJobWrapper(job,NULL,JOB_SEQ));
         tail = tail->getNext();
     }
 

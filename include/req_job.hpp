@@ -9,7 +9,9 @@ namespace jsch{
     class Future;
     class LinkedJobWrapper;
 
+
     class RequiredJob : public Job {
+
 
         public:
 
@@ -23,7 +25,6 @@ namespace jsch{
             private:
 
                 Job* job;
-
                 pthread_mutex_t* mutex;
 
                 /*Counter of required jobs that have been executed*/

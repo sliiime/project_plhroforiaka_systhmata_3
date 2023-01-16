@@ -40,7 +40,22 @@ int main(){
 	Utils::readQueryBatch(inPublic,queries);
     */
 
-    const size_t TOTAL_WORKERS = queries.get_size()*4;
+    size_t TOTAL_WORKERS;
+    size_t THREADS_PER_QUERY;
+    size_t TOTAL_QUERIES;
+    bool debug = 0;
+    if (debug){ 
+        TOTAL_WORKERS = 20;
+        THREADS_PER_QUERY = 3;
+        TOTAL_QUERIES = 5;
+    }else {
+        TOTAL_WORKERS = queries.get_size()*4;
+        THREADS_PER_QUERY = queries.get_size()*3;
+        TOTAL_QUERIES = queries.get_size();
+    }
+
+
+
     jsch::JobScheduler jobScheduler(TOTAL_WORKERS);
 
     // Create pointers to relations
@@ -70,12 +85,11 @@ int main(){
     Result* results[queries.get_size()];
 
 
-
-    for (uint i = 0 ; i < queries.get_size(); i++){
+    for (uint i = 0 ; i < TOTAL_QUERIES; i++){
         //Calculate queries
         exec->addRequiredJob(
             jsch::make_job([&,i]{
-                results[i] = operationManager.ExecuteAndReturn(&queries[i],jobScheduler,3);
+                results[i] = operationManager.ExecuteAndReturn(&queries[i],jobScheduler,THREADS_PER_QUERY);
             })
         );
         //Print results of each query
@@ -91,7 +105,7 @@ int main(){
     jsch::Future* future = jobScheduler.submitJobWithFuture(exec);
     future->wait();
 
-    for (uint i = 0; i < queries.get_size(); i++) delete results[i];
+    for (uint i = 0; i < TOTAL_QUERIES; i++) delete results[i];
     printf("\n");
     auto end = chrono::high_resolution_clock::now();
 

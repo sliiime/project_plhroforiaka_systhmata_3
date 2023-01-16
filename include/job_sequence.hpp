@@ -29,7 +29,8 @@ namespace jsch{
         virtual Job* makeRequired(pthread_mutex_t* mutex,size_t* executed,size_t* total,LinkedJobWrapper* dependent,JobScheduler& jobScheduler) override;
         virtual ~JobSequence() override;
         JobSequence* then(Job* job);
-    };                
+    };
+                
 }
 
 #endif

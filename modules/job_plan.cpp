@@ -51,7 +51,7 @@ void* JobPlan::execute(){
 
             pthread_mutex_destroy(mutex);
 
-            delete executed;
+            delete totalRequired;
             delete mutex;
             delete executed;
         }
@@ -61,13 +61,12 @@ void* JobPlan::execute(){
     depTail = depTail->getNext();
 
     for (LinkedJobWrapper* trav = required; trav != NULL; trav = trav->getNext()){
-        trav->getJob()->makeRequired(mutex,executed,totalRequired,dependent,jobScheduler);
+        trav->makeRequired(mutex,executed,totalRequired,dependent,jobScheduler);
     }
 
     LinkedJobWrapper* next = NULL;
     for (LinkedJobWrapper* trav = required; trav != NULL; trav = next){
         next = trav->getNext();
-        trav->makeRequired(mutex,executed,totalRequired,dependent,jobScheduler);
         jobScheduler.submitJob(trav);
     }
 

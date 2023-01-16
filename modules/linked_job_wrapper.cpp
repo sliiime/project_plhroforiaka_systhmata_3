@@ -2,7 +2,7 @@
 
 using namespace jsch;
 
-LinkedJobWrapper::LinkedJobWrapper(Job* job,LinkedJobWrapper* next ) : job(job),next(next) {}
+LinkedJobWrapper::LinkedJobWrapper(Job* job,LinkedJobWrapper* next,WrapperType type) : job(job),next(next),type(type) {}
 
 LinkedJobWrapper* LinkedJobWrapper::getNext() {
     return next;
@@ -37,3 +37,8 @@ Job* LinkedJobWrapper::makeRequired(pthread_mutex_t* mutex,size_t* counter,size_
 void LinkedJobWrapper::gatherFutures(pthread_mutex_t* mutex, pthread_cond_t* cond, bool* complete, size_t& totalJobs){
     job->gatherFutures(mutex,cond,complete,totalJobs);
 }
+
+WrapperType LinkedJobWrapper::getType() const {
+    return type;
+}
+
