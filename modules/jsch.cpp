@@ -1,6 +1,12 @@
 #include "jsch.hpp"
+#include "job_sequence.hpp"
+#include "job_plan.hpp"
+#include "job_spec.hpp"
+#include "job.hpp"
 
-void* jsch::JobScheduler::work(){
+using namespace jsch;
+
+void* JobScheduler::work(){
     /*Initialization*/
     pthread_mutex_lock(&waitMutex);
         size_t id = selfSerialId();
@@ -23,21 +29,21 @@ void* jsch::JobScheduler::work(){
 }
 
 
-size_t jsch::JobScheduler::selfSerialId() const {
+size_t JobScheduler::selfSerialId() const {
     for (size_t i = 0; i < total; i++){
         if (pthread_self() == workers[i]) return i;
     }
     assert(false);
 }
 
-bool jsch::JobScheduler::onVacation() const {
+bool JobScheduler::onVacation() const {
     for (size_t i = 0; i < total; i++){
         if (active[i]) return false;
     }
     return true;
 }
 
-jsch::JobScheduler::JobScheduler(size_t workersCount): queue(ccqueue<Job*>()),total(workersCount)  {
+JobScheduler::JobScheduler(size_t workersCount): queue(ccqueue<Job*>()),total(workersCount)  {
     workers = new pthread_t[workersCount];
     active = new bool[workersCount];
     completed = new size_t[workersCount];
@@ -51,31 +57,43 @@ jsch::JobScheduler::JobScheduler(size_t workersCount): queue(ccqueue<Job*>()),to
     pthread_mutex_unlock(&waitMutex);
 }
 
-void jsch::JobScheduler::submitJob(Job* job){ 
+void JobScheduler::submitJob(Job* job){ 
     if (!_stopped) {
         queue.push(job);
     }else delete job;
 }
 
-jsch::Future* jsch::JobScheduler::submitJobWithFuture(Job* job){
+Future* JobScheduler::submitJobWithFuture(Job* job){
         Future* future = job->enableFuture();
         submitJob(job);
 
         return future;
 }
 
-size_t jsch::JobScheduler::workersCount() const {
+size_t JobScheduler::workersCount() const {
     return total;
 }
 
-size_t jsch::JobScheduler::jobsCompleted() const {
+size_t JobScheduler::jobsCompleted() const {
     size_t jobsCompleted = 0;
     for (size_t i = 0 ; i < total; i++) jobsCompleted += completed[i];
     
     return jobsCompleted;
 }
 
-jsch::JobScheduler::~JobScheduler(){
+JobSequence* JobScheduler::makeJobSequence(Job* job){
+    return new JobSequence(job,*this);
+}
+
+JobSequence* JobScheduler::makeJobSequence(){
+    return new JobSequence(*this);
+}
+
+JobPlan* JobScheduler::makeJobPlan(){
+    return new JobPlan(*this);
+}
+
+JobScheduler::~JobScheduler(){
 
     /*Workers must terminate*/
     _stopped = true;

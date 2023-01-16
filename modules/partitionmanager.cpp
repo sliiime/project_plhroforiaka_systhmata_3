@@ -1,5 +1,8 @@
 #include "partitionmanager.hpp"
 #include "jsch.hpp"
+#include "job_plan.hpp"
+#include "job_sequence.hpp"
+#include "job_spec.hpp"
 
 PartitionManager::PartitionManager(Column *column) {
     this->column = column;
@@ -231,7 +234,7 @@ void PartitionManager::Reorder(uint n_bits,jsch::JobScheduler& jobScheduler,cons
     //Set last thread to have the remaining tuples
     args[num_threads-1].size = num_tuples_last_thread;
 
-    jsch::JobScheduler::JobPlan* mainPlan = jobScheduler.makeJobPlan();
+    jsch::JobPlan* mainPlan = jobScheduler.makeJobPlan();
 
     for (int i = 0 ; i < num_threads; i++){
         mainPlan->addRequiredJob(jsch::make_job(
@@ -257,7 +260,7 @@ void PartitionManager::Reorder(uint n_bits,jsch::JobScheduler& jobScheduler,cons
 
 
 
-    jsch::JobScheduler::JobPlan* sidePlan = jobScheduler.makeJobPlan();  
+    jsch::JobPlan* sidePlan = jobScheduler.makeJobPlan();  
 
     sidePlan->addRequiredJob(
         jsch::make_job(

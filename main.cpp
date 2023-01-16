@@ -14,6 +14,9 @@
 #include <time.h>
 #include "filtering.hpp"
 #include "jsch.hpp"
+#include "job_plan.hpp"
+#include "job_sequence.hpp"
+#include "job_spec.hpp"
 #include <pthread.h>
 #include <chrono>
 #include "optimizer.hpp"
@@ -61,8 +64,8 @@ int main(){
     auto start = chrono::high_resolution_clock::now();
     OperationManager operationManager(&relationPtrs);
 
-    jsch::JobScheduler::JobPlan* exec = jobScheduler.makeJobPlan();
-    jsch::JobScheduler::JobSequence* print = jobScheduler.makeJobSequence();
+    jsch::JobPlan* exec = jobScheduler.makeJobPlan();
+    jsch::JobSequence* print = jobScheduler.makeJobSequence();
 
     Result* results[queries.get_size()];
 

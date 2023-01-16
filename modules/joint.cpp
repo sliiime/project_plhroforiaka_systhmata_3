@@ -1,4 +1,7 @@
 #include "joint.hpp"
+#include "jsch.hpp"
+#include "job_plan.hpp"
+#include "job_spec.hpp"
 
 Joint::~Joint(){
     delete tuples;
@@ -59,7 +62,7 @@ Joint::Joint(Column *c1, Column *c2, jsch::JobScheduler& jobScheduler,const size
 
     Vector<Tuple> workerTuples[pm1.size];
 
-    jsch::JobScheduler::JobPlan* mainPlan = jobScheduler.makeJobPlan();
+    jsch::JobPlan* mainPlan = jobScheduler.makeJobPlan();
     // Iterate over the partitions
     for (uint i=0; i<pm1.size; i++){
         mainPlan->addRequiredJob(jsch::make_job([&,i]{
