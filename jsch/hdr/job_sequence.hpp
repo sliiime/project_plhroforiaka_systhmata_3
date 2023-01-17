@@ -1,5 +1,5 @@
-#ifndef __JSCH_JOBSEQUENCE__
-#define __JSCH_JOBSEQUENCE__
+#ifndef __JSCH_JOB_SEQUENCE__
+#define __JSCH_JOB_SEQUENCE__
 
 #include "job.hpp"
 

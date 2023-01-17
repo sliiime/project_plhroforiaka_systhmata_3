@@ -1,3 +1,6 @@
+#ifndef __JSCH_JOB_SPEC__
+#define __JSCH_JOB_SPEC__
+
 #include <utility>
 
 #include "supervisor.hpp"
@@ -55,3 +58,5 @@ namespace jsch{
         return new JobSpecification<T>(std::forward<T>(spec)); 
     }
 }
+
+#endif

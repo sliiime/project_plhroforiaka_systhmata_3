@@ -1,3 +1,6 @@
+#ifndef __JSCH_SUPERVISOR__
+#define __JSCH_SUPERVISOR__
+
 #include <pthread.h>
 
 namespace jsch{
@@ -14,3 +17,5 @@ namespace jsch{
             void checkOut();
     };
 }
+
+#endif

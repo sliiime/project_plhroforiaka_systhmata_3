@@ -1,3 +1,6 @@
+#ifndef __JSCH_LINKED_JOB_WRAPPER__
+#define __JSCH_LINKED_JOB_WRAPPER__
+
 #include "job.hpp"
 
 namespace jsch {
@@ -34,3 +37,5 @@ namespace jsch {
 
     };
 }
+
+#endif

@@ -1,8 +1,11 @@
 # Paths
 MODULES = modules
-INCLUDE = include
 BINARIES = bin
 TEMPLATES = templates
+
+INCLUDE = -I include -I jsch/hdr -I jsch/temp -I jsch
+
+JSCH_BIN = $(wildcard jsch/bin/*)
 
 # Compiler
 CC = g++
@@ -13,7 +16,7 @@ EXEC = main
 # Optimization
 OPFLAGS = -O3 -march=native
 # Compile options
-CPPFLAGS = -pthread -Wall -g -I $(INCLUDE) -I $(TEMPLATES) $(OPFLAGS)
+CPPFLAGS = -pthread -Wall -g $(INCLUDE) -I $(TEMPLATES) $(OPFLAGS)
 
 # Object files
 SRC = $(wildcard $(MODULES)/*.cpp)
@@ -23,8 +26,16 @@ OBJS = $(EXEC).o $(MODULE_OBJS)
 # Template files
 TMPLTS = $(TEMPLATES)/list.hpp $(TEMPLATES)/vector.hpp $(TEMPLATES)/queue.hpp
 
-$(EXEC): $(OBJS) $(TMPLTS) $(INCLUDE)/config.hpp $(INCLUDE)/parser.hpp $(INCLUDE)/relation.hpp
-	$(CC) $(CPPFLAGS) $(OBJS) -o $(EXEC)
+$(EXEC): $(OBJS) $(TMPLTS) include/config.hpp include/parser.hpp include/relation.hpp JSCH
+	$(CC) $(CPPFLAGS) $(JSCH_BIN) $(OBJS) -o $(EXEC)
+
+JSCH: FORCE
+	make -C jsch
+
+# https://www.gnu.org/software/make/manual/make.html#Force-Targets
+
+FORCE:
+
 
 intergration_test: intergration_test.o $(TMPLTS)
 	$(CC) intergration_test.o -o intergration_test
@@ -40,10 +51,9 @@ $(MODULE_OBJS): $(BINARIES)/%.o : $(MODULES)/%.cpp
 	$(CC) $(CPPFLAGS) -c $<  -o $@
   
 clean:
-	rm -f $(BINARIES)/* $(EXEC) $(EXEC).o intergration_test output.txt
+	rm -f $(BINARIES)/* $(EXEC) $(EXEC).o intergration_test output.txt 
+	make clean -C jsch
 
-print:
-	echo $(MODULE_OBJS)
 
 ARGS = < input_relations.txt
 

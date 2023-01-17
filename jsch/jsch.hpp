@@ -9,5 +9,7 @@
 #include "linked_job_wrapper.hpp"
 #include "req_job.hpp"
 #include "supervisor.hpp"
+#include "ccqueue.hpp"
+#include "job_spec.hpp"
 
 #endif

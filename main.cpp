@@ -31,7 +31,7 @@ int main(){
     Utils::readRelations(std::cin,relations);
     
 	//Reads batch of queries and stores them to queries vector
-    std::ifstream in("workloads/public/public.work6");
+    std::ifstream in("workloads/small/all.work");
     Utils::readQueryBatch(in,queries);
     /* 
     std::ifstream inPublic("workloads/public/public.work");

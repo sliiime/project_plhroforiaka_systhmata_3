@@ -1,3 +1,6 @@
+#ifndef __JSCH_JOB_PLAN__
+#define __JSCH_JOB_PLAN__
+
 #include "job.hpp"
 
 namespace jsch{
@@ -31,3 +34,5 @@ namespace jsch{
                 JobPlan* addDependentJob(Job* job);
     };
 }
+
+#endif
