@@ -37,3 +37,6 @@ intergration_test
 output.txt
 .vscode
 workloads/public/*
+jsch/bin/
+massif.out*
+
