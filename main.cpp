@@ -14,6 +14,9 @@
 #include <time.h>
 #include "filtering.hpp"
 #include "jsch.hpp"
+#include "job_plan.hpp"
+#include "job_sequence.hpp"
+#include "job_spec.hpp"
 #include <pthread.h>
 #include <chrono>
 #include "optimizer.hpp"
@@ -37,7 +40,22 @@ int main(){
 	Utils::readQueryBatch(inPublic,queries);
     */
 
-    const size_t TOTAL_WORKERS = 6*queries.get_size();
+    size_t TOTAL_WORKERS;
+    size_t THREADS_PER_QUERY;
+    size_t TOTAL_QUERIES;
+    bool debug = 0;
+    if (debug){ 
+        TOTAL_WORKERS = 20;
+        THREADS_PER_QUERY = 3;
+        TOTAL_QUERIES = 5;
+    }else {
+        TOTAL_WORKERS = queries.get_size()*4;
+        THREADS_PER_QUERY = queries.get_size()*3;
+        TOTAL_QUERIES = queries.get_size();
+    }
+
+
+
     jsch::JobScheduler jobScheduler(TOTAL_WORKERS);
 
     // Create pointers to relations
@@ -61,18 +79,17 @@ int main(){
     auto start = chrono::high_resolution_clock::now();
     OperationManager operationManager(&relationPtrs);
 
-    jsch::JobScheduler::JobPlan* exec = jobScheduler.makeJobPlan();
-    jsch::JobScheduler::JobSequence* print = jobScheduler.makeJobSequence();
+    jsch::JobPlan* exec = jobScheduler.makeJobPlan();
+    jsch::JobSequence* print = jobScheduler.makeJobSequence();
 
     Result* results[queries.get_size()];
 
 
-
-    for (uint i = 0 ; i < queries.get_size(); i++){
+    for (uint i = 0 ; i < TOTAL_QUERIES; i++){
         //Calculate queries
         exec->addRequiredJob(
             jsch::make_job([&,i]{
-                results[i] = operationManager.ExecuteAndReturn(&queries[i],jobScheduler,5);
+                results[i] = operationManager.ExecuteAndReturn(&queries[i],jobScheduler,THREADS_PER_QUERY);
             })
         );
         //Print results of each query
@@ -88,7 +105,7 @@ int main(){
     jsch::Future* future = jobScheduler.submitJobWithFuture(exec);
     future->wait();
 
-    for (uint i = 0; i < queries.get_size(); i++) delete results[i];
+    for (uint i = 0; i < TOTAL_QUERIES; i++) delete results[i];
     printf("\n");
     auto end = chrono::high_resolution_clock::now();
 
