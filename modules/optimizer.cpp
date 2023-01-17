@@ -260,7 +260,7 @@ BestTree::~BestTree(){}
 // ======= Optimizer ======= //
 
 
-void Optimizer::OptimizeFilterEqual(RelationStatistics *rs, int column, double value){
+void OptimizeFilterEqual(RelationStatistics *rs, int column, double value){
 
     // Calculate new statistics for column
     double A_lowerBound = value;
@@ -302,7 +302,7 @@ void Optimizer::OptimizeFilterEqual(RelationStatistics *rs, int column, double v
     rs->TotalValues(column, A_totalValues);
 }
 
-RelationStatistics Optimizer::OptimizeFilterLessGreater(RelationStatistics *rs, int column, double value, bool less, bool inplace=true){
+RelationStatistics OptimizeFilterLessGreater(RelationStatistics *rs, int column, double value, bool less, bool inplace=true){
 
     RelationStatistics new_rs; 
 
@@ -369,7 +369,7 @@ RelationStatistics Optimizer::OptimizeFilterLessGreater(RelationStatistics *rs, 
 
 }
 
-void Optimizer::OptimizeSelfJoin(RelationStatistics *rs, int column1, int column2){
+void OptimizeSelfJoin(RelationStatistics *rs, int column1, int column2){
     
     // Calculate new statistics for columns
     double A_lowerBound;
@@ -418,7 +418,7 @@ void Optimizer::OptimizeSelfJoin(RelationStatistics *rs, int column1, int column
 
 
 
-RelationStatistics *Optimizer::OptimizeJoin(RelationStatistics *rs1, RelationStatistics *rs2, int column1, int column2){
+RelationStatistics *OptimizeJoin(RelationStatistics *rs1, RelationStatistics *rs2, int column1, int column2){
 
     // Create new tuples for each relation
 
@@ -534,23 +534,26 @@ Optimizer::~Optimizer(){
 
 
 
+struct OptimizeArgs{
+    Vector<QueryInfo *> *queries;
+    Vector<RelationStatistics *> *allRelationStats;
+    uint start;
+    uint end;
+};
 
+void *ParallelOptimize(void *_args){
 
+    OptimizeArgs *args = (OptimizeArgs *) _args;
 
-
-
-
-void Optimizer::Optimize(){
-
-    //// Calculate statistics for each relation
-    for(uint i = 0; i < relations->get_size(); i++){
-        RelationStatistics *rs = new RelationStatistics(relations->get(i));
-        allRelationStats->push(rs);
-    }
+    // Get query statistics
+    Vector<QueryInfo *> *queries = args->queries;
+    Vector<RelationStatistics *> *allRelationStats = args->allRelationStats;
+    uint start = args->start;
+    uint end = args->end;
 
 
     //// Initialize query statistics
-    for (uint i=0; i<queries->get_size(); i++){
+    for (uint i=start; i<end; i++){
         Vector<RelationStatistics *> *qs = new Vector<RelationStatistics *>();
 
         // Get query
@@ -750,11 +753,12 @@ void Optimizer::Optimize(){
                     Vector<PredicateInfo *> predicateOrder = bestTree.GetPredicateOrder(combination);
                     RelationStatistics *rs3;
                     while (joinPredicatesList.get_size() > 0){
-                        JoinPredicate *bestJP;
+                        JoinPredicate *bestJP = NULL;
                         double min_cost = -1;
                         for (ListNode<JoinPredicate*> *node = joinPredicatesList.begin(); node != NULL; node = node->get_next()){
                             JoinPredicate *jp = node->get_value();
                             RelationStatistics *rs3 = OptimizeJoin(rs1, rs2, jp->combinationColumn, jp->relationColumn);
+                            extraRS.push(rs3);
 
                             double cost = rs3->GetCost();
 
@@ -765,14 +769,11 @@ void Optimizer::Optimize(){
                         }
                         joinPredicatesList.remove(bestJP);
                         rs3 = OptimizeJoin(rs1, rs2, bestJP->combinationColumn, bestJP->relationColumn);
+                        extraRS.push(rs3);
                         rs1 = rs3;
                         predicateOrder.push(bestJP->predicate);
 
                     }
-
-
-                    // RelationStatistics *rs3 = OptimizeJoin(rs1, rs2, combinationColumn, relationColumn);
-                    extraRS.push(rs3);
 
                     // printf("New stats: ");
                     // currCombination.print();
@@ -839,6 +840,45 @@ void Optimizer::Optimize(){
 
     }
 
-
+    return NULL;
 }
 
+void Optimizer::Optimize(){
+
+    //// Calculate statistics for each relation
+    for(uint i = 0; i < relations->get_size(); i++){
+        RelationStatistics *rs = new RelationStatistics(relations->get(i));
+        allRelationStats->push(rs);
+    }
+
+    // Devide work between threads
+    uint numThreads = THREADS;
+    uint numQueries = queries->get_size();
+    uint queriesPerThread = numQueries / numThreads;
+    uint queriesLeft = numQueries % numThreads;
+
+    // Create POSIX threads
+    pthread_t threads[numThreads];
+
+    // Create thread arguments
+    OptimizeArgs args[numThreads];
+
+    // Create threads
+    for (uint i=0; i<numThreads; i++){
+        args[i].queries = queries;
+        args[i].allRelationStats = allRelationStats;
+        args[i].start = i*queriesPerThread;
+        args[i].end = (i+1)*queriesPerThread - 1;
+        if (i == numThreads-1){
+            args[i].end += queriesLeft;
+        }
+        pthread_create(&threads[i], NULL, ParallelOptimize, (void *)&args[i]);
+    }
+
+    // Wait for threads to finish
+    for (uint i=0; i<numThreads; i++){
+        pthread_join(threads[i], NULL);
+    }
+
+
+}
