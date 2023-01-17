@@ -1,11 +1,12 @@
-#ifndef __JSCH__
-#define __JSCH__
+#ifndef __JSCH_JOB_SCHEDULER__
+#define __JSCH_JOB_SCHEDULER__
 
 #include <iostream>
-#include <list>
-#include "ccqueue.hpp"
-#include <pthread.h>
 #include <fstream>
+#include <list>
+#include <pthread.h>
+
+#include "ccqueue.hpp"
 
 namespace jsch{
 

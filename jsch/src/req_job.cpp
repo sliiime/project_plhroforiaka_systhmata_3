@@ -1,5 +1,5 @@
 #include "req_job.hpp"
-#include "jsch.hpp"
+#include "job_scheduler.hpp"
 #include "linked_job_wrapper.hpp"
 
 using namespace jsch;

@@ -1,7 +1,7 @@
 #include "job_sequence.hpp"
 #include "linked_job_wrapper.hpp"
 #include "job_spec.hpp"
-#include "jsch.hpp"
+#include "job_scheduler.hpp"
 
 using namespace jsch;
 
@@ -13,7 +13,7 @@ void* JobSequence::execute(){
     size_t* executed = new size_t[size];
     size_t* total = new size_t[size];
     
-    for (int i = 0; i < size; i++){
+    for (size_t i = 0; i < size; i++){
         pthread_mutex_init(mutexes+i,NULL);
         executed[i] = 0;
         total[i] = 0;

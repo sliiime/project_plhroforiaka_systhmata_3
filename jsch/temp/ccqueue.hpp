@@ -1,9 +1,10 @@
-#ifndef __CCQUEUE_
-#define __CCQUEUE_
+#ifndef __JSCH_CCQUEUE__
+#define __JSCH_CCQUEUE__
 
 #include <iostream>
 #include <pthread.h>
 #include <assert.h>
+
 
 namespace jsch{
 

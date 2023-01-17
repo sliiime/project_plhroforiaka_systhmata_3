@@ -1,5 +1,5 @@
 #include "job_plan.hpp"
-#include "jsch.hpp"
+#include "job_scheduler.hpp"
 #include "future.hpp"
 #include "linked_job_wrapper.hpp"
 #include "job_spec.hpp"
