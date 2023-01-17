@@ -1,4 +1,9 @@
 #include <iostream>
+#include <fstream>
+#include <time.h>
+#include <pthread.h>
+#include <chrono>
+
 #include "relation.hpp"
 #include "parser.hpp"
 #include "utils.hpp"
@@ -10,15 +15,8 @@
 #include "parser.hpp"
 #include "joint.hpp"
 #include "operationmanager.hpp"
-#include <fstream>
-#include <time.h>
 #include "filtering.hpp"
 #include "jsch.hpp"
-#include "job_plan.hpp"
-#include "job_sequence.hpp"
-#include "job_spec.hpp"
-#include <pthread.h>
-#include <chrono>
 #include "optimizer.hpp"
 
 int main(){
@@ -33,7 +31,7 @@ int main(){
     Utils::readRelations(std::cin,relations);
     
 	//Reads batch of queries and stores them to queries vector
-    std::ifstream in("workloads/small/all.work");
+    std::ifstream in("workloads/public/public.work6");
     Utils::readQueryBatch(in,queries);
     /* 
     std::ifstream inPublic("workloads/public/public.work");
