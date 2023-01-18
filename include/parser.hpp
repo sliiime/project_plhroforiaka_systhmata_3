@@ -140,6 +140,7 @@ class QueryInfo {
    QueryInfo(QueryInfo&& queryInfo) = default;
    /// Move assignment operator
    QueryInfo& operator=(QueryInfo&& queryInfo) = default;
+   QueryInfo& operator=(QueryInfo& queryInfo) = default;
    /// The constructor that parses a query
    QueryInfo(std::string rawQuery);
    ~QueryInfo() = default;

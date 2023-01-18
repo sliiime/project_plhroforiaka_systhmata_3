@@ -25,7 +25,7 @@ public:
     static uint32_t hopSuperFastHash(int32_t);
     static uint32_t identityHash(int32_t);
     static void readRelations(std::istream& in,Vector<Relation>& relations);
-    static void readQueryBatch(std::istream&in,Vector<QueryInfo>& queryBatch);
+    static bool readQueryBatch(std::istream&in,Vector<QueryInfo>& queryBatch);
     static Vector<PredicateInfo*> findJoinSequence(Vector<PredicateInfo>& predicates);
 
 

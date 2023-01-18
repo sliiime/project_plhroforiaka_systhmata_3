@@ -90,13 +90,17 @@ void Utils::readRelations(std::istream& in,Vector<Relation>& relations){
     
 }
 
-void Utils::readQueryBatch(std::istream& in,Vector<QueryInfo>& queryBatch){
-    
+bool Utils::readQueryBatch(std::istream& in,Vector<QueryInfo>& queryBatch){
+        
+        bool flag = false;
         std::string rawQuery;
-        for (std::getline(in,rawQuery); rawQuery != "F"; std::getline(in,rawQuery) ){
-
+        while (std::getline(in,rawQuery)){
+            flag = true;
+            if (rawQuery == "F") break;
             queryBatch.push(QueryInfo(rawQuery));
         }
+
+        return flag;
         
 }
 

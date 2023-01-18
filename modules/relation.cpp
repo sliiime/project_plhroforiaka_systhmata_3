@@ -59,7 +59,7 @@ void Relation::loadRelation(const char* fileName)
   auto numColumns=*reinterpret_cast<size_t*>(addr);
   addr+=sizeof(size_t);
   for (unsigned i=0;i<numColumns;++i) {
-    RelationColumn column;
+    RelationColumn column(size);
     for (uint j = 0; j < size; j++){
       column.push(reinterpret_cast<uint64_t*>(addr)[j]);
     }

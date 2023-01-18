@@ -22,7 +22,6 @@
 int main(){
 
     Vector<Relation> relations;
-    Vector<QueryInfo> queries;
 
 
 
@@ -31,71 +30,92 @@ int main(){
     Utils::readRelations(std::cin,relations);
     
 	//Reads batch of queries and stores them to queries vector
-    std::ifstream in("workloads/public/all.work");
-    Utils::readQueryBatch(in,queries);
+    std::ifstream in("workloads/small/small.work");
     /* 
     std::ifstream inPublic("workloads/public/public.work");
 	Utils::readQueryBatch(inPublic,queries);
     */
 
-    const size_t TOTAL_WORKERS = queries.get_size()*4;
-    const size_t THREADS_PER_QUERY = queries.get_size() * 3;
-    const size_t TOTAL_QUERIES = queries.get_size();
+    
 
+    // const size_t TOTAL_WORKERS = 50;
+    // const size_t THREADS_PER_QUERY = queries.get_size() * 3;
 
-
-    jsch::JobScheduler jobScheduler(TOTAL_WORKERS);
-
-    // Create pointers to relations
     Vector<Relation*> relationPtrs = Vector<Relation*>();
     for (uint i = 0 ; i < relations.get_size(); i++){
         relationPtrs.push(&relations[i]);
     }
 
-    // Create pointers to relations
-    Vector<QueryInfo*> queryPtrs = Vector<QueryInfo*>();
-    for (uint i = 0 ; i < queries.get_size(); i++){
-        queryPtrs.push(&queries[i]);
-    }
-
-    // Optimize query order
-
-
-    Optimizer optimizer(&relationPtrs, &queryPtrs);
-    optimizer.Optimize();
-
-    // Execute queries
-    auto start = chrono::high_resolution_clock::now();
+    jsch::JobScheduler jobScheduler(50);
     OperationManager operationManager(&relationPtrs);
+    const size_t THREADS_PER_QUERY = 4;
 
-    jsch::JobPlan* exec = jobScheduler.makeJobPlan();
-    jsch::JobSequence* print = jobScheduler.makeJobSequence();
+    jsch::JobPlan* main = jobScheduler.makeJobPlan();
+    jsch::JobSequence* print = NULL;
+    jsch::JobPlan* current = main;
 
-    Result* results[TOTAL_QUERIES];
+
+    while (true){
+        
+
+        Vector<QueryInfo> queries;
+        bool done = !Utils::readQueryBatch(in,queries);
+
+        if (done) break;
+
+        if (print != NULL){
+            current = jobScheduler.makeJobPlan();
+            print->then(current);
+        }
+
+        const size_t TOTAL_QUERIES = queries.get_size();
+
+        Vector<QueryInfo*> queryPtrs = Vector<QueryInfo*>();
+        for (uint i = 0 ; i < queries.get_size(); i++){
+            queryPtrs.push(&queries[i]);
+        }
+
+        Optimizer optimizer(&relationPtrs, &queryPtrs);
+        optimizer.Optimize();
+
+        Result** results = new Result*[TOTAL_QUERIES];
+
+        print = jobScheduler.makeJobSequence(); 
 
 
-    for (uint i = 0 ; i < TOTAL_QUERIES; i++){
-        //Calculate queries
-        exec->addRequiredJob(
-            jsch::make_job([&,i]{
-                results[i] = operationManager.ExecuteAndReturn(&queries[i],jobScheduler,THREADS_PER_QUERY);
-            })
+        for (uint i = 0; i < TOTAL_QUERIES; i++){
+            
+            current->addRequiredJob( jsch::make_job(
+                [=,&jobScheduler,&operationManager]() mutable {
+                    results[i] = operationManager.ExecuteAndReturn(&queries[i],jobScheduler,THREADS_PER_QUERY);
+                }
+            ));
+
+            print->then( jsch::make_job(
+                [=,&operationManager]() mutable {
+                    operationManager.printColumnProjection(queries[i].selections,results[i]);
+                }
+
+            ));
+
+        }
+
+        print->then (
+            jsch::make_job(
+                [=]() mutable {
+                    delete[] results;
+                }
+            )
         );
-        //Print results of each query
-        print->then(
-            jsch::make_job([&,i]{
-                operationManager.printColumnProjection(queries[i].selections,results[i]);
-            })
-        );
+
+        current->addDependentJob(print);
+
     }
 
-    exec->addDependentJob(print);
-
-    jsch::Future* future = jobScheduler.submitJobWithFuture(exec);
+    auto start = chrono::high_resolution_clock::now();
+    jsch::Future* future = jobScheduler.submitJobWithFuture(main);
     future->wait();
 
-    for (uint i = 0; i < TOTAL_QUERIES; i++) delete results[i];
-    printf("\n");
     auto end = chrono::high_resolution_clock::now();
 
     auto duration = chrono::duration_cast<chrono::microseconds>(end - start);

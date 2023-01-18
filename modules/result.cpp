@@ -222,7 +222,7 @@ void Result::SetJoint(int rel1, int rel2, Joint *joint){
         // Iterate through joined relations
         for(ListNode<IDVector> *l = joined->begin(); l != NULL; l = joined->get_next(l)){
             // Create new vector
-            IDVector newVector = new Vector<int>();
+            IDVector newVector = new Vector<int>(vector1->get_size());
             // Get the old vector
             IDVector oldVector = l->get_value();
             if (DEBUG) printf("[DEBUG] Old vector: %p size %d\n", oldVector, oldVector->get_size());
