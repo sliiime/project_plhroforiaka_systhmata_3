@@ -31,26 +31,16 @@ int main(){
     Utils::readRelations(std::cin,relations);
     
 	//Reads batch of queries and stores them to queries vector
-    std::ifstream in("workloads/small/all.work");
+    std::ifstream in("workloads/public/public.work");
     Utils::readQueryBatch(in,queries);
     /* 
     std::ifstream inPublic("workloads/public/public.work");
 	Utils::readQueryBatch(inPublic,queries);
     */
 
-    size_t TOTAL_WORKERS;
-    size_t THREADS_PER_QUERY;
-    size_t TOTAL_QUERIES;
-    bool debug = 0;
-    if (debug){ 
-        TOTAL_WORKERS = 20;
-        THREADS_PER_QUERY = 3;
-        TOTAL_QUERIES = 5;
-    }else {
-        TOTAL_WORKERS = queries.get_size()*4;
-        THREADS_PER_QUERY = queries.get_size()*3;
-        TOTAL_QUERIES = queries.get_size();
-    }
+    const size_t TOTAL_WORKERS = queries.get_size()*4;
+    const size_t THREADS_PER_QUERY = queries.get_size() * 3;
+    const size_t TOTAL_QUERIES = queries.get_size();
 
 
 
@@ -70,6 +60,7 @@ int main(){
 
     // Optimize query order
 
+
     Optimizer optimizer(&relationPtrs, &queryPtrs);
     optimizer.Optimize();
 
@@ -80,7 +71,7 @@ int main(){
     jsch::JobPlan* exec = jobScheduler.makeJobPlan();
     jsch::JobSequence* print = jobScheduler.makeJobSequence();
 
-    Result* results[queries.get_size()];
+    Result* results[TOTAL_QUERIES];
 
 
     for (uint i = 0 ; i < TOTAL_QUERIES; i++){

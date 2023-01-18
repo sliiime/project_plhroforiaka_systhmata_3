@@ -16,12 +16,11 @@ void* JobScheduler::work(){
         Job* job;
         if (queue.pop(job) == success){
             /* Pops -> Queue is empty , worker is idle -> Bad */
-            active[id] = true;
             job->execute();
-            completed[id]++;
-            active[id] = false;
-
             delete job;
+
+            completed[id]++;
+
         } 
     }
     /*Find better return value*/
@@ -36,16 +35,8 @@ size_t JobScheduler::selfSerialId() const {
     assert(false);
 }
 
-bool JobScheduler::onVacation() const {
-    for (size_t i = 0; i < total; i++){
-        if (active[i]) return false;
-    }
-    return true;
-}
-
 JobScheduler::JobScheduler(size_t workersCount): queue(ccqueue<Job*>()),total(workersCount)  {
     workers = new pthread_t[workersCount];
-    active = new bool[workersCount];
     completed = new size_t[workersCount];
 
     pthread_mutex_init(&waitMutex,NULL);
@@ -53,7 +44,10 @@ JobScheduler::JobScheduler(size_t workersCount): queue(ccqueue<Job*>()),total(wo
         
     /*Not allowing workers to start until proper structure initialization has taken place */
     pthread_mutex_lock(&waitMutex);
-        for (size_t i = 0 ; i < workersCount; i++) pthread_create(workers+i,NULL,(workPtr)&JobScheduler::work,this);
+        for (size_t i = 0 ; i < workersCount; i++) {
+            completed[i] = 0;
+            pthread_create(workers+i,NULL,(workPtr)&JobScheduler::work,this);
+        }
     pthread_mutex_unlock(&waitMutex);
 }
 
@@ -80,7 +74,7 @@ size_t JobScheduler::jobsCompleted() const {
     
     return jobsCompleted;
 }
-
+ 
 JobSequence* JobScheduler::makeJobSequence(Job* job){
     return new JobSequence(job,*this);
 }
@@ -101,11 +95,18 @@ JobScheduler::~JobScheduler(){
     queue.close();
     /*Join threads */
     for (size_t i = 0 ; i < total; i++) pthread_join(workers[i],NULL);
+
+    // size_t totalCompleted = 0;
+    // for (size_t i = 0; i < total; i++) {
+    //     std::cout << "Worker " << i << " completed " << completed[i] << " jobs" << std::endl;
+    //     totalCompleted+= completed[i];
+    // }
+
+    // std::cout << "Total jobs completed :" << totalCompleted << std::endl;
     
     /*Delete workers metadata*/
     delete[] workers;
     delete[] completed;
-    delete[] active;
     /*Destroy synchronization resources*/
     pthread_mutex_destroy(&waitMutex);
     pthread_cond_destroy(&waitCond);

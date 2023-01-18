@@ -18,8 +18,7 @@ namespace jsch{
     class JobScheduler{
 
             private:
-                
-                size_t submitted;
+
                 /*Jobs completed by workers */
                 size_t* completed;
                 ccqueue<Job*> queue;
@@ -27,19 +26,13 @@ namespace jsch{
                 /*Total workers*/
                 size_t total;
 
-                /*Workers that are currently executing a job*/
-                bool* active;
                 /*Tells workers to quit */
                 bool _stopped = false;
                 /*No new jobs can be added*/
-                bool _blocked = false;
-                /*Method used by workers */
                 void* work();
                 /*Mutex and cond used for wait */
                 pthread_mutex_t waitMutex;
                 pthread_cond_t waitCond;
-                /*Returns whether there are currently active workers*/
-                bool onVacation() const;
                 /*Used by worker to find its serialId*/
                 size_t selfSerialId() const;
                 size_t jobsCompleted() const;
