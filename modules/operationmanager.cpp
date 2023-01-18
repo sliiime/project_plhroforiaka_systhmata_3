@@ -482,14 +482,9 @@ void OperationManager::Execute(QueryInfo *queryInfo,jsch::JobScheduler& jobSched
 
     //// Join Relations ////
 
-    // Sort joins
-    Vector<PredicateInfo *> sortedJoinPredicates;
-    
-    if (joinPredicates->get_size() > 0)
-        sortedJoinPredicates = Utils::findJoinSequence(*joinPredicates);
 
-    for (uint i = 0; i < sortedJoinPredicates.get_size(); i++){
-        PredicateInfo predicateInfo = *sortedJoinPredicates.get(i);
+    for (uint i = 0; i < joinPredicates->get_size(); i++){
+        PredicateInfo predicateInfo = joinPredicates->get(i);
         uint leftColId = predicateInfo.left.colId;
         uint leftRelId = predicateInfo.left.binding;
         uint rightColId = predicateInfo.right.colId;
