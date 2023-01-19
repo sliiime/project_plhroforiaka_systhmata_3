@@ -90,6 +90,8 @@ int main(){
         print->then (
             jsch::make_job(
                 [=]() mutable {
+                    for (int i = 0 ; i < TOTAL_QUERIES; i++) delete results[i];
+                    
                     delete[] results;
                 }
             )
