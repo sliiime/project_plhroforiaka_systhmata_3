@@ -852,8 +852,8 @@ void Optimizer::Optimize(){
     }
 
     // Devide work between threads
-    uint numThreads = THREADS;
     uint numQueries = queries->get_size();
+    uint numThreads = numQueries > THREADS ? THREADS : numQueries;
     uint queriesPerThread = numQueries / numThreads;
     uint queriesLeft = numQueries % numThreads;
 
