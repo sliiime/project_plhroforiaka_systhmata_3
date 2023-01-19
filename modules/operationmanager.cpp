@@ -3,6 +3,7 @@
 #include "utils.hpp"
 #include "parser.hpp"
 #include "fstream"
+#include "config.hpp"
 
 
 long OperationManager::ProjectColumn(const Column &column){
@@ -309,10 +310,22 @@ void OperationManager::Execute(QueryInfo *queryInfo){
 
 
     //// Join Relations ////
+    const uint JOIN_PREDICATES = joinPredicates->get_size();
+
+    #ifdef NO_OPTIMIZER
+        Vector<PredicateInfo*> sortedJoinPredicates;
+        if (JOIN_PREDICATES > 0) sortedJoinPredicates = Utils::findJoinSequence(*joinPredicates);
+    #endif
 
 
-    for (uint i = 0; i < joinPredicates->get_size(); i++){
-        PredicateInfo predicateInfo = joinPredicates->get(i);
+    for (uint i = 0; i < JOIN_PREDICATES; i++){
+
+        #ifdef NO_OPTIMIZER
+            PredicateInfo predicateInfo = *sortedJoinPredicates.get(i);
+        #else 
+            PredicateInfo predicateInfo = joinPredicates->get(i);
+        #endif
+        
         uint leftColId = predicateInfo.left.colId;
         uint leftRelId = predicateInfo.left.binding;
         uint rightColId = predicateInfo.right.colId;

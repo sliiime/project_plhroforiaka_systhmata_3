@@ -37,8 +37,8 @@ int main(){
         relationPtrs.push(&relations[i]);
     }
 
-    jsch::JobScheduler jobScheduler(50);
     OperationManager operationManager(&relationPtrs);
+    jsch::JobScheduler jobScheduler(50);
     const size_t THREADS_PER_QUERY = 4;
 
     jsch::JobPlan* main = jobScheduler.makeJobPlan();
@@ -62,8 +62,10 @@ int main(){
             queryPtrs.push(&queries[i]);
         }
 
-        Optimizer optimizer(&relationPtrs, &queryPtrs);
-        optimizer.Optimize();
+        #ifndef NO_OPTIMIZER
+            Optimizer optimizer(&relationPtrs, &queryPtrs);
+            optimizer.Optimize();
+        #endif
 
         Result** results = new Result*[TOTAL_QUERIES];
 
@@ -90,7 +92,7 @@ int main(){
         print->then (
             jsch::make_job(
                 [=]() mutable {
-                    for (int i = 0 ; i < TOTAL_QUERIES; i++) delete results[i];
+                    for (uint i = 0 ; i < TOTAL_QUERIES; i++) delete results[i];
     
                     delete[] results;
                 }
@@ -106,7 +108,6 @@ int main(){
     auto start = chrono::high_resolution_clock::now();
     jsch::Future* future = jobScheduler.submitJobWithFuture(main);
     future->wait();
-
     auto end = chrono::high_resolution_clock::now();
 
     auto duration = chrono::duration_cast<chrono::microseconds>(end - start);

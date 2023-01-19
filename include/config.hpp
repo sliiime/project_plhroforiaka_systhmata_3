@@ -7,3 +7,4 @@
 
 #define DEBUG 0
 #define THREADS 4
+// #define NO_OPTIMIZER
