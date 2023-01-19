@@ -55,10 +55,16 @@ clean:
 	make clean -C jsch
 
 
-ARGS = < input_relations.txt
+ARGS = < small_input.txt
 
 run: $(EXEC)
 	./$(EXEC) $(ARGS)
+
+run_public: $(EXEC)
+	./$(EXEC) < public_input.txt
+
+run_small: $(EXEC)
+	./$(EXEC) < small_input.txt
 
 # Run with gdb
 gdb: $(EXEC)
