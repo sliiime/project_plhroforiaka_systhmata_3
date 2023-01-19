@@ -1,0 +1,1263 @@
+--------------------------------------------------------------------------------
+Command:            ./main
+Massif arguments:   (none)
+ms_print arguments: massif.out.37487
+--------------------------------------------------------------------------------
+
+
+    MB
+20.55^                                                                    #   
+     |                                                                    #   
+     |                                              @                     #   
+     |          @    :@:::: ::                      @ :     ::::  ::::@:::#:::
+     |        ::@@::::@: ::::::::::::@::::::@::  :::@:::::@:::::@:::::@:::#:::
+     |        ::@@::::@: ::::::::::::@::::::@:::@:::@:::::@:::::@:::::@:::#:::
+     |      @:::@@::::@: ::::::::::::@::::::@:::@:::@:::::@:::::@:::::@:::#:::
+     |  ::::@:::@@::::@: ::::::::::::@::::::@:::@:::@:::::@:::::@:::::@:::#:::
+     |  ::::@:::@@::::@: ::::::::::::@::::::@:::@:::@:::::@:::::@:::::@:::#:::
+     |  ::::@:::@@::::@: ::::::::::::@::::::@:::@:::@:::::@:::::@:::::@:::#:::
+     |  ::::@:::@@::::@: ::::::::::::@::::::@:::@:::@:::::@:::::@:::::@:::#:::
+     |  ::::@:::@@::::@: ::::::::::::@::::::@:::@:::@:::::@:::::@:::::@:::#:::
+     |  ::::@:::@@::::@: ::::::::::::@::::::@:::@:::@:::::@:::::@:::::@:::#:::
+     | @::::@:::@@::::@: ::::::::::::@::::::@:::@:::@:::::@:::::@:::::@:::#:::
+     | @::::@:::@@::::@: ::::::::::::@::::::@:::@:::@:::::@:::::@:::::@:::#:::
+     | @::::@:::@@::::@: ::::::::::::@::::::@:::@:::@:::::@:::::@:::::@:::#:::
+     | @::::@:::@@::::@: ::::::::::::@::::::@:::@:::@:::::@:::::@:::::@:::#:::
+     | @::::@:::@@::::@: ::::::::::::@::::::@:::@:::@:::::@:::::@:::::@:::#:::
+     | @::::@:::@@::::@: ::::::::::::@::::::@:::@:::@:::::@:::::@:::::@:::#:::
+     | @::::@:::@@::::@: ::::::::::::@::::::@:::@:::@:::::@:::::@:::::@:::#:::
+   0 +----------------------------------------------------------------------->Mi
+     0                                                                   705.6
+
+Number of snapshots: 95
+ Detailed snapshots: [1, 7, 11, 12, 17, 33, 41, 45, 49, 59, 69, 79, 86, 87, 88, 89, 90 (peak)]
+
+--------------------------------------------------------------------------------
+  n        time(i)         total(B)   useful-heap(B) extra-heap(B)    stacks(B)
+--------------------------------------------------------------------------------
+  0              0                0                0             0            0
+  1     11,856,337        7,670,216        7,659,975        10,241            0
+99.87% (7,659,975B) (heap allocation functions) malloc/new/new[], --alloc-fns, etc.
+->94.20% (7,225,344B) 0x11D889: push (vector.hpp:86)
+| ->94.20% (7,225,344B) 0x11D889: Relation::loadRelation(char const*) (relation.cpp:64)
+|   ->94.20% (7,225,344B) 0x11DB31: Relation::Relation(char const*) (relation.cpp:76)
+|     ->94.20% (7,225,344B) 0x11C508: Utils::readRelations(std::istream&, Vector<Relation>&) (utils.cpp:89)
+|       ->94.20% (7,225,344B) 0x10EDF0: main (main.cpp:31)
+|         
+->03.42% (262,656B) 0x112666: Vector (vector.hpp:67)
+| ->03.42% (262,656B) 0x112666: Vector<Vector<unsigned long> >::Vector() (vector.hpp:67)
+|   ->02.56% (196,608B) 0x112717: Relation (relation.hpp:40)
+|   | ->02.56% (196,608B) 0x112717: Vector<Relation>::Vector() (vector.hpp:67)
+|   |   ->02.56% (196,608B) 0x10EDD2: main (main.cpp:24)
+|   |     
+|   ->00.86% (66,048B) in 1+ places, all below ms_print's threshold (01.00%)
+|   
+->02.24% (171,975B) in 24 places, all below massif's threshold (1.00%)
+  
+--------------------------------------------------------------------------------
+  n        time(i)         total(B)   useful-heap(B) extra-heap(B)    stacks(B)
+--------------------------------------------------------------------------------
+  2     21,363,619       14,287,360       14,277,231        10,129            0
+  3     35,446,121       14,308,944       14,298,241        10,703            0
+  4     44,021,368       14,313,864       14,303,056        10,808            0
+  5     50,163,705       14,314,952       14,304,120        10,832            0
+  6     61,513,657       15,055,872       15,038,928        16,944            0
+  7     69,759,859       16,056,336       16,032,848        23,488            0
+99.85% (16,032,848B) (heap allocation functions) malloc/new/new[], --alloc-fns, etc.
+->86.22% (13,844,480B) 0x11D889: push (vector.hpp:86)
+| ->86.22% (13,844,480B) 0x11D889: Relation::loadRelation(char const*) (relation.cpp:64)
+|   ->86.22% (13,844,480B) 0x11DB31: Relation::Relation(char const*) (relation.cpp:76)
+|     ->86.22% (13,844,480B) 0x11C508: Utils::readRelations(std::istream&, Vector<Relation>&) (utils.cpp:89)
+|       ->86.22% (13,844,480B) 0x10EDF0: main (main.cpp:31)
+|         
+->04.77% (765,168B) 0x122319: Column::Column(unsigned int) (column.cpp:28)
+| ->04.77% (765,168B) 0x1202EC: Result::GetColumn(int, int) (result.cpp:74)
+|   ->02.15% (344,752B) 0x11F2E1: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:511)
+|   | ->02.15% (344,752B) 0x112274: operator() (main.cpp:90)
+|   |   ->02.15% (344,752B) 0x112274: jsch::JobSpecification<main::{lambda()
+|   |     ->02.15% (344,752B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|   |       ->02.15% (344,752B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|   |         ->02.15% (344,752B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|   |           ->02.15% (344,752B) 0x4FA6608: start_thread (pthread_create.c:477)
+|   |             ->02.15% (344,752B) 0x50E0162: clone (clone.S:95)
+|   |               
+|   ->01.47% (236,104B) 0x11F2F3: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:512)
+|   | ->01.47% (236,104B) 0x112274: operator() (main.cpp:90)
+|   |   ->01.47% (236,104B) 0x112274: jsch::JobSpecification<main::{lambda()
+|   |     ->01.47% (236,104B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|   |       ->01.47% (236,104B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|   |         ->01.47% (236,104B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|   |           ->01.47% (236,104B) 0x4FA6608: start_thread (pthread_create.c:477)
+|   |             ->01.47% (236,104B) 0x50E0162: clone (clone.S:95)
+|   |               
+|   ->01.15% (184,312B) 0x11EF8C: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:422)
+|     ->01.15% (184,312B) 0x112274: operator() (main.cpp:90)
+|       ->01.15% (184,312B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->01.15% (184,312B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->01.15% (184,312B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->01.15% (184,312B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->01.15% (184,312B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->01.15% (184,312B) 0x50E0162: clone (clone.S:95)
+|                   
+->02.86% (458,752B) 0x11FF1B: push (vector.hpp:102)
+| ->02.86% (458,752B) 0x11FF1B: Result::AddRelation(Relation*) (result.cpp:45)
+|   ->02.86% (458,752B) 0x11EF43: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:400)
+|     ->02.86% (458,752B) 0x112274: operator() (main.cpp:90)
+|       ->02.86% (458,752B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->02.86% (458,752B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->02.86% (458,752B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->02.86% (458,752B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->02.86% (458,752B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->02.86% (458,752B) 0x50E0162: clone (clone.S:95)
+|                   
+->02.45% (393,472B) 0x11F5EB: push (vector.hpp:86)
+| ->02.45% (393,472B) 0x11F5EB: Filter::FilterConstant(Column&, FilterInfo::Comparison, int) (filtering.cpp:30)
+|   ->02.45% (393,472B) 0x11EF9B: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:424)
+|     ->02.45% (393,472B) 0x112274: operator() (main.cpp:90)
+|       ->02.45% (393,472B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->02.45% (393,472B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->02.45% (393,472B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->02.45% (393,472B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->02.45% (393,472B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->02.45% (393,472B) 0x50E0162: clone (clone.S:95)
+|                   
+->02.01% (322,912B) in 178 places, all below massif's threshold (1.00%)
+| 
+->01.54% (248,064B) 0x112666: Vector (vector.hpp:67)
+  ->01.54% (248,064B) 0x112666: Vector<Vector<unsigned long> >::Vector() (vector.hpp:67)
+    ->01.54% (248,064B) in 2 places, all below massif's threshold (1.00%)
+      
+--------------------------------------------------------------------------------
+  n        time(i)         total(B)   useful-heap(B) extra-heap(B)    stacks(B)
+--------------------------------------------------------------------------------
+  8     80,172,209       16,073,072       16,040,880        32,192            0
+  9     89,027,376       17,239,184       17,202,736        36,448            0
+ 10     98,267,787       17,395,456       17,355,760        39,696            0
+ 11    108,983,493       18,353,144       18,303,736        49,408            0
+99.73% (18,303,736B) (heap allocation functions) malloc/new/new[], --alloc-fns, etc.
+->75.43% (13,844,480B) 0x11D889: push (vector.hpp:86)
+| ->75.43% (13,844,480B) 0x11D889: Relation::loadRelation(char const*) (relation.cpp:64)
+|   ->75.43% (13,844,480B) 0x11DB31: Relation::Relation(char const*) (relation.cpp:76)
+|     ->75.43% (13,844,480B) 0x11C508: Utils::readRelations(std::istream&, Vector<Relation>&) (utils.cpp:89)
+|       ->75.43% (13,844,480B) 0x10EDF0: main (main.cpp:31)
+|         
+->08.47% (1,554,296B) 0x122319: Column::Column(unsigned int) (column.cpp:28)
+| ->08.47% (1,554,296B) 0x1202EC: Result::GetColumn(int, int) (result.cpp:74)
+|   ->04.45% (815,800B) 0x11F2E1: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:511)
+|   | ->04.45% (815,800B) 0x112274: operator() (main.cpp:90)
+|   |   ->04.45% (815,800B) 0x112274: jsch::JobSpecification<main::{lambda()
+|   |     ->04.45% (815,800B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|   |       ->04.45% (815,800B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|   |         ->04.45% (815,800B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|   |           ->04.45% (815,800B) 0x4FA6608: start_thread (pthread_create.c:477)
+|   |             ->04.45% (815,800B) 0x50E0162: clone (clone.S:95)
+|   |               
+|   ->02.21% (406,248B) 0x11F2F3: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:512)
+|   | ->02.21% (406,248B) 0x112274: operator() (main.cpp:90)
+|   |   ->02.21% (406,248B) 0x112274: jsch::JobSpecification<main::{lambda()
+|   |     ->02.21% (406,248B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|   |       ->02.21% (406,248B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|   |         ->02.21% (406,248B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|   |           ->02.21% (406,248B) 0x4FA6608: start_thread (pthread_create.c:477)
+|   |             ->02.21% (406,248B) 0x50E0162: clone (clone.S:95)
+|   |               
+|   ->01.81% (332,248B) 0x11EF8C: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:422)
+|     ->01.81% (332,248B) 0x112274: operator() (main.cpp:90)
+|       ->01.81% (332,248B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->01.81% (332,248B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->01.81% (332,248B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->01.81% (332,248B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->01.81% (332,248B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->01.81% (332,248B) 0x50E0162: clone (clone.S:95)
+|                   
+->07.32% (1,343,488B) 0x11F5EB: push (vector.hpp:86)
+| ->07.32% (1,343,488B) 0x11F5EB: Filter::FilterConstant(Column&, FilterInfo::Comparison, int) (filtering.cpp:30)
+|   ->07.32% (1,343,488B) 0x11EF9B: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:424)
+|     ->07.32% (1,343,488B) 0x112274: operator() (main.cpp:90)
+|       ->07.32% (1,343,488B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->07.32% (1,343,488B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->07.32% (1,343,488B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->07.32% (1,343,488B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->07.32% (1,343,488B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->07.32% (1,343,488B) 0x50E0162: clone (clone.S:95)
+|                   
+->04.69% (860,160B) 0x11FF1B: push (vector.hpp:102)
+| ->04.69% (860,160B) 0x11FF1B: Result::AddRelation(Relation*) (result.cpp:45)
+|   ->04.69% (860,160B) 0x11EF43: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:400)
+|     ->04.69% (860,160B) 0x112274: operator() (main.cpp:90)
+|       ->04.69% (860,160B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->04.69% (860,160B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->04.69% (860,160B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->04.69% (860,160B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->04.69% (860,160B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->04.69% (860,160B) 0x50E0162: clone (clone.S:95)
+|                   
+->02.47% (453,248B) in 178 places, all below massif's threshold (1.00%)
+| 
+->01.35% (248,064B) 0x112666: Vector (vector.hpp:67)
+  ->01.35% (248,064B) 0x112666: Vector<Vector<unsigned long> >::Vector() (vector.hpp:67)
+    ->01.35% (248,064B) in 2 places, all below massif's threshold (1.00%)
+      
+--------------------------------------------------------------------------------
+  n        time(i)         total(B)   useful-heap(B) extra-heap(B)    stacks(B)
+--------------------------------------------------------------------------------
+ 12    121,753,966       18,195,856       18,160,680        35,176            0
+99.81% (18,160,680B) (heap allocation functions) malloc/new/new[], --alloc-fns, etc.
+->76.09% (13,844,480B) 0x11D889: push (vector.hpp:86)
+| ->76.09% (13,844,480B) 0x11D889: Relation::loadRelation(char const*) (relation.cpp:64)
+|   ->76.09% (13,844,480B) 0x11DB31: Relation::Relation(char const*) (relation.cpp:76)
+|     ->76.09% (13,844,480B) 0x11C508: Utils::readRelations(std::istream&, Vector<Relation>&) (utils.cpp:89)
+|       ->76.09% (13,844,480B) 0x10EDF0: main (main.cpp:31)
+|         
+->07.38% (1,343,488B) 0x11F5EB: push (vector.hpp:86)
+| ->07.38% (1,343,488B) 0x11F5EB: Filter::FilterConstant(Column&, FilterInfo::Comparison, int) (filtering.cpp:30)
+|   ->07.38% (1,343,488B) 0x11EF9B: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:424)
+|     ->07.38% (1,343,488B) 0x112274: operator() (main.cpp:90)
+|       ->07.38% (1,343,488B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->07.38% (1,343,488B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->07.38% (1,343,488B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->07.38% (1,343,488B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->07.38% (1,343,488B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->07.38% (1,343,488B) 0x50E0162: clone (clone.S:95)
+|                   
+->05.03% (914,800B) 0x122319: Column::Column(unsigned int) (column.cpp:28)
+| ->05.03% (914,800B) 0x1202EC: Result::GetColumn(int, int) (result.cpp:74)
+|   ->02.73% (496,048B) 0x11F2E1: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:511)
+|   | ->02.73% (496,048B) 0x112274: operator() (main.cpp:90)
+|   |   ->02.73% (496,048B) 0x112274: jsch::JobSpecification<main::{lambda()
+|   |     ->02.73% (496,048B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|   |       ->02.73% (496,048B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|   |         ->02.73% (496,048B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|   |           ->02.73% (496,048B) 0x4FA6608: start_thread (pthread_create.c:477)
+|   |             ->02.73% (496,048B) 0x50E0162: clone (clone.S:95)
+|   |               
+|   ->02.30% (418,752B) 0x11F2F3: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:512)
+|   | ->02.30% (418,752B) 0x112274: operator() (main.cpp:90)
+|   |   ->02.30% (418,752B) 0x112274: jsch::JobSpecification<main::{lambda()
+|   |     ->02.30% (418,752B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|   |       ->02.30% (418,752B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|   |         ->02.30% (418,752B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|   |           ->02.30% (418,752B) 0x4FA6608: start_thread (pthread_create.c:477)
+|   |             ->02.30% (418,752B) 0x50E0162: clone (clone.S:95)
+|   |               
+|   ->00.00% (0B) in 1+ places, all below ms_print's threshold (01.00%)
+|   
+->04.55% (828,304B) 0x1195DA: operator() (partitionmanager.cpp:277)
+| ->04.55% (828,304B) 0x1195DA: jsch::JobSpecification<PartitionManager::Reorder(unsigned int, jsch::JobScheduler&, unsigned long)::{lambda()
+|   ->04.55% (828,304B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|     ->04.55% (828,304B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|       ->04.55% (828,304B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|         ->04.55% (828,304B) 0x4FA6608: start_thread (pthread_create.c:477)
+|           ->04.55% (828,304B) 0x50E0162: clone (clone.S:95)
+|             
+->03.33% (606,208B) 0x11FF1B: push (vector.hpp:102)
+| ->03.33% (606,208B) 0x11FF1B: Result::AddRelation(Relation*) (result.cpp:45)
+|   ->03.33% (606,208B) 0x11EF43: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:400)
+|     ->03.33% (606,208B) 0x112274: operator() (main.cpp:90)
+|       ->03.33% (606,208B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->03.33% (606,208B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->03.33% (606,208B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->03.33% (606,208B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->03.33% (606,208B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->03.33% (606,208B) 0x50E0162: clone (clone.S:95)
+|                   
+->02.06% (375,336B) in 182 places, all below massif's threshold (1.00%)
+| 
+->01.36% (248,064B) 0x112666: Vector (vector.hpp:67)
+  ->01.36% (248,064B) 0x112666: Vector<Vector<unsigned long> >::Vector() (vector.hpp:67)
+    ->01.36% (248,064B) in 2 places, all below massif's threshold (1.00%)
+      
+--------------------------------------------------------------------------------
+  n        time(i)         total(B)   useful-heap(B) extra-heap(B)    stacks(B)
+--------------------------------------------------------------------------------
+ 13    131,197,191       17,872,536       17,823,320        49,216            0
+ 14    139,434,603       18,114,928       18,076,088        38,840            0
+ 15    146,240,614       18,002,912       17,972,792        30,120            0
+ 16    155,963,787       18,412,936       18,374,416        38,520            0
+ 17    165,032,250       19,003,832       18,960,016        43,816            0
+99.77% (18,960,016B) (heap allocation functions) malloc/new/new[], --alloc-fns, etc.
+->72.85% (13,844,480B) 0x11D889: push (vector.hpp:86)
+| ->72.85% (13,844,480B) 0x11D889: Relation::loadRelation(char const*) (relation.cpp:64)
+|   ->72.85% (13,844,480B) 0x11DB31: Relation::Relation(char const*) (relation.cpp:76)
+|     ->72.85% (13,844,480B) 0x11C508: Utils::readRelations(std::istream&, Vector<Relation>&) (utils.cpp:89)
+|       ->72.85% (13,844,480B) 0x10EDF0: main (main.cpp:31)
+|         
+->09.09% (1,727,920B) 0x1195DA: operator() (partitionmanager.cpp:277)
+| ->09.09% (1,727,920B) 0x1195DA: jsch::JobSpecification<PartitionManager::Reorder(unsigned int, jsch::JobScheduler&, unsigned long)::{lambda()
+|   ->09.09% (1,727,920B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|     ->09.09% (1,727,920B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|       ->09.09% (1,727,920B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|         ->09.09% (1,727,920B) 0x4FA6608: start_thread (pthread_create.c:477)
+|           ->09.09% (1,727,920B) 0x50E0162: clone (clone.S:95)
+|             
+->07.07% (1,343,488B) 0x11F5EB: push (vector.hpp:86)
+| ->07.07% (1,343,488B) 0x11F5EB: Filter::FilterConstant(Column&, FilterInfo::Comparison, int) (filtering.cpp:30)
+|   ->07.07% (1,343,488B) 0x11EF9B: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:424)
+|     ->07.07% (1,343,488B) 0x112274: operator() (main.cpp:90)
+|       ->07.07% (1,343,488B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->07.07% (1,343,488B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->07.07% (1,343,488B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->07.07% (1,343,488B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->07.07% (1,343,488B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->07.07% (1,343,488B) 0x50E0162: clone (clone.S:95)
+|                   
+->03.02% (573,440B) 0x11FF1B: push (vector.hpp:102)
+| ->03.02% (573,440B) 0x11FF1B: Result::AddRelation(Relation*) (result.cpp:45)
+|   ->03.02% (573,440B) 0x11EF43: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:400)
+|     ->03.02% (573,440B) 0x112274: operator() (main.cpp:90)
+|       ->03.02% (573,440B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->03.02% (573,440B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->03.02% (573,440B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->03.02% (573,440B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->03.02% (573,440B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->03.02% (573,440B) 0x50E0162: clone (clone.S:95)
+|                   
+->03.01% (571,600B) 0x122319: Column::Column(unsigned int) (column.cpp:28)
+| ->03.01% (571,600B) 0x1202EC: Result::GetColumn(int, int) (result.cpp:74)
+|   ->03.01% (571,592B) 0x11F2F3: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:512)
+|   | ->03.01% (571,592B) 0x112274: operator() (main.cpp:90)
+|   |   ->03.01% (571,592B) 0x112274: jsch::JobSpecification<main::{lambda()
+|   |     ->03.01% (571,592B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|   |       ->03.01% (571,592B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|   |         ->03.01% (571,592B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|   |           ->03.01% (571,592B) 0x4FA6608: start_thread (pthread_create.c:477)
+|   |             ->03.01% (571,592B) 0x50E0162: clone (clone.S:95)
+|   |               
+|   ->00.00% (8B) in 1+ places, all below ms_print's threshold (01.00%)
+|   
+->02.36% (447,768B) in 201 places, all below massif's threshold (1.00%)
+| 
+->01.31% (248,064B) 0x112666: Vector (vector.hpp:67)
+| ->01.31% (248,064B) 0x112666: Vector<Vector<unsigned long> >::Vector() (vector.hpp:67)
+|   ->01.31% (248,064B) in 2 places, all below massif's threshold (1.00%)
+|     
+->01.07% (203,256B) 0x1227B2: Histogram::Histogram(int) (histogram.cpp:5)
+  ->01.07% (203,256B) in 5 places, all below massif's threshold (1.00%)
+    
+--------------------------------------------------------------------------------
+  n        time(i)         total(B)   useful-heap(B) extra-heap(B)    stacks(B)
+--------------------------------------------------------------------------------
+ 18    173,361,003       19,035,208       18,989,352        45,856            0
+ 19    184,907,879       19,024,104       18,981,800        42,304            0
+ 20    198,566,019       19,011,400       18,973,464        37,936            0
+ 21    209,818,927       19,138,208       19,109,312        28,896            0
+ 22    216,629,944       18,242,488       18,212,960        29,528            0
+ 23    227,852,180       18,298,424       18,219,016        79,408            0
+ 24    234,589,530       18,353,672       18,278,992        74,680            0
+ 25    243,572,964       18,438,640       18,368,488        70,152            0
+ 26    252,777,177       18,215,840       18,153,272        62,568            0
+ 27    266,332,731       17,965,296       17,890,480        74,816            0
+ 28    276,801,746       18,103,592       18,023,304        80,288            0
+ 29    283,539,808       18,076,512       18,002,256        74,256            0
+ 30    294,985,114       18,252,856       18,179,904        72,952            0
+ 31    302,234,295       18,239,864       18,170,000        69,864            0
+ 32    313,097,804       18,219,144       18,154,176        64,968            0
+ 33    327,676,319       17,974,480       17,912,120        62,360            0
+99.65% (17,912,120B) (heap allocation functions) malloc/new/new[], --alloc-fns, etc.
+->77.02% (13,844,480B) 0x11D889: push (vector.hpp:86)
+| ->77.02% (13,844,480B) 0x11D889: Relation::loadRelation(char const*) (relation.cpp:64)
+|   ->77.02% (13,844,480B) 0x11DB31: Relation::Relation(char const*) (relation.cpp:76)
+|     ->77.02% (13,844,480B) 0x11C508: Utils::readRelations(std::istream&, Vector<Relation>&) (utils.cpp:89)
+|       ->77.02% (13,844,480B) 0x10EDF0: main (main.cpp:31)
+|         
+->05.29% (950,272B) 0x11F5EB: push (vector.hpp:86)
+| ->05.29% (950,272B) 0x11F5EB: Filter::FilterConstant(Column&, FilterInfo::Comparison, int) (filtering.cpp:30)
+|   ->05.29% (950,272B) 0x11EF9B: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:424)
+|     ->05.29% (950,272B) 0x112274: operator() (main.cpp:90)
+|       ->05.29% (950,272B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->05.29% (950,272B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->05.29% (950,272B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->05.29% (950,272B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->05.29% (950,272B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->05.29% (950,272B) 0x50E0162: clone (clone.S:95)
+|                   
+->05.14% (924,544B) in 214 places, all below massif's threshold (1.00%)
+| 
+->04.71% (845,944B) 0x1195DA: operator() (partitionmanager.cpp:277)
+| ->04.71% (845,944B) 0x1195DA: jsch::JobSpecification<PartitionManager::Reorder(unsigned int, jsch::JobScheduler&, unsigned long)::{lambda()
+|   ->04.71% (845,944B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|     ->04.71% (845,944B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|       ->04.71% (845,944B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|         ->04.71% (845,944B) 0x4FA6608: start_thread (pthread_create.c:477)
+|           ->04.71% (845,944B) 0x50E0162: clone (clone.S:95)
+|             
+->02.77% (497,872B) 0x122319: Column::Column(unsigned int) (column.cpp:28)
+| ->02.77% (497,872B) 0x1202EC: Result::GetColumn(int, int) (result.cpp:74)
+|   ->02.56% (460,720B) 0x11F2F3: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:512)
+|   | ->02.56% (460,720B) 0x112274: operator() (main.cpp:90)
+|   |   ->02.56% (460,720B) 0x112274: jsch::JobSpecification<main::{lambda()
+|   |     ->02.56% (460,720B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|   |       ->02.56% (460,720B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|   |         ->02.56% (460,720B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|   |           ->02.56% (460,720B) 0x4FA6608: start_thread (pthread_create.c:477)
+|   |             ->02.56% (460,720B) 0x50E0162: clone (clone.S:95)
+|   |               
+|   ->00.21% (37,152B) in 1+ places, all below ms_print's threshold (01.00%)
+|   
+->01.82% (327,680B) 0x11FF1B: push (vector.hpp:102)
+| ->01.82% (327,680B) 0x11FF1B: Result::AddRelation(Relation*) (result.cpp:45)
+|   ->01.82% (327,680B) 0x11EF43: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:400)
+|     ->01.82% (327,680B) 0x112274: operator() (main.cpp:90)
+|       ->01.82% (327,680B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->01.82% (327,680B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->01.82% (327,680B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->01.82% (327,680B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->01.82% (327,680B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->01.82% (327,680B) 0x50E0162: clone (clone.S:95)
+|                   
+->01.52% (273,264B) 0x1227B2: Histogram::Histogram(int) (histogram.cpp:5)
+| ->01.40% (251,160B) 0x11A717: PartitionManager::Reorder(unsigned int, jsch::JobScheduler&, unsigned long) (partitionmanager.cpp:221)
+| | ->01.34% (240,552B) 0x125B1B: Joint::Joint(Column*, Column*, jsch::JobScheduler&, unsigned long) (joint.cpp:58)
+| | | ->01.34% (240,552B) 0x11F236: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:521)
+| | |   ->01.34% (240,552B) 0x112274: operator() (main.cpp:90)
+| | |     ->01.34% (240,552B) 0x112274: jsch::JobSpecification<main::{lambda()
+| | |       ->01.34% (240,552B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+| | |         ->01.34% (240,552B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+| | |           ->01.34% (240,552B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+| | |             ->01.34% (240,552B) 0x4FA6608: start_thread (pthread_create.c:477)
+| | |               ->01.34% (240,552B) 0x50E0162: clone (clone.S:95)
+| | |                 
+| | ->00.06% (10,608B) in 1+ places, all below ms_print's threshold (01.00%)
+| | 
+| ->00.12% (22,104B) in 1+ places, all below ms_print's threshold (01.00%)
+| 
+->01.38% (248,064B) 0x112666: Vector (vector.hpp:67)
+  ->01.38% (248,064B) 0x112666: Vector<Vector<unsigned long> >::Vector() (vector.hpp:67)
+    ->01.38% (248,064B) in 2 places, all below massif's threshold (1.00%)
+      
+--------------------------------------------------------------------------------
+  n        time(i)         total(B)   useful-heap(B) extra-heap(B)    stacks(B)
+--------------------------------------------------------------------------------
+ 34    338,578,446       17,963,608       17,903,128        60,480            0
+ 35    345,873,535       17,953,512       17,895,208        58,304            0
+ 36    353,246,655       17,942,760       17,886,760        56,000            0
+ 37    360,612,373       17,932,440       17,878,664        53,776            0
+ 38    375,212,308       17,320,864       17,274,736        46,128            0
+ 39    386,083,022       17,368,968       17,337,592        31,376            0
+ 40    393,344,872       17,441,216       17,414,136        27,080            0
+ 41    400,685,176       17,412,800       17,356,856        55,944            0
+99.68% (17,356,856B) (heap allocation functions) malloc/new/new[], --alloc-fns, etc.
+->79.51% (13,844,480B) 0x11D889: push (vector.hpp:86)
+| ->79.51% (13,844,480B) 0x11D889: Relation::loadRelation(char const*) (relation.cpp:64)
+|   ->79.51% (13,844,480B) 0x11DB31: Relation::Relation(char const*) (relation.cpp:76)
+|     ->79.51% (13,844,480B) 0x11C508: Utils::readRelations(std::istream&, Vector<Relation>&) (utils.cpp:89)
+|       ->79.51% (13,844,480B) 0x10EDF0: main (main.cpp:31)
+|         
+->05.78% (1,006,992B) 0x1195DA: operator() (partitionmanager.cpp:277)
+| ->05.78% (1,006,992B) 0x1195DA: jsch::JobSpecification<PartitionManager::Reorder(unsigned int, jsch::JobScheduler&, unsigned long)::{lambda()
+|   ->05.78% (1,006,992B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|     ->05.78% (1,006,992B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|       ->05.78% (1,006,992B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|         ->05.78% (1,006,992B) 0x4FA6608: start_thread (pthread_create.c:477)
+|           ->05.78% (1,006,992B) 0x50E0162: clone (clone.S:95)
+|             
+->05.55% (965,624B) in 215 places, all below massif's threshold (1.00%)
+| 
+->05.27% (917,504B) 0x11F5EB: push (vector.hpp:86)
+| ->05.27% (917,504B) 0x11F5EB: Filter::FilterConstant(Column&, FilterInfo::Comparison, int) (filtering.cpp:30)
+|   ->05.27% (917,504B) 0x11EF9B: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:424)
+|     ->05.27% (917,504B) 0x112274: operator() (main.cpp:90)
+|       ->05.27% (917,504B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->05.27% (917,504B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->05.27% (917,504B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->05.27% (917,504B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->05.27% (917,504B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->05.27% (917,504B) 0x50E0162: clone (clone.S:95)
+|                   
+->01.42% (248,064B) 0x112666: Vector (vector.hpp:67)
+| ->01.42% (248,064B) 0x112666: Vector<Vector<unsigned long> >::Vector() (vector.hpp:67)
+|   ->01.42% (248,064B) in 2 places, all below massif's threshold (1.00%)
+|     
+->01.08% (188,032B) 0x122319: Column::Column(unsigned int) (column.cpp:28)
+| ->01.08% (188,032B) 0x1202EC: Result::GetColumn(int, int) (result.cpp:74)
+|   ->01.06% (184,312B) 0x11F2F3: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:512)
+|   | ->01.06% (184,312B) 0x112274: operator() (main.cpp:90)
+|   |   ->01.06% (184,312B) 0x112274: jsch::JobSpecification<main::{lambda()
+|   |     ->01.06% (184,312B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|   |       ->01.06% (184,312B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|   |         ->01.06% (184,312B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|   |           ->01.06% (184,312B) 0x4FA6608: start_thread (pthread_create.c:477)
+|   |             ->01.06% (184,312B) 0x50E0162: clone (clone.S:95)
+|   |               
+|   ->00.02% (3,720B) in 1+ places, all below ms_print's threshold (01.00%)
+|   
+->01.07% (186,160B) 0x1227B2: Histogram::Histogram(int) (histogram.cpp:5)
+  ->01.07% (186,160B) in 5 places, all below massif's threshold (1.00%)
+    
+--------------------------------------------------------------------------------
+  n        time(i)         total(B)   useful-heap(B) extra-heap(B)    stacks(B)
+--------------------------------------------------------------------------------
+ 42    408,047,581       17,396,192       17,344,008        52,184            0
+ 43    415,328,395       17,380,512       17,331,688        48,824            0
+ 44    426,203,034       16,909,016       16,872,320        36,696            0
+ 45    437,107,412       17,119,664       17,069,096        50,568            0
+99.70% (17,069,096B) (heap allocation functions) malloc/new/new[], --alloc-fns, etc.
+->80.87% (13,844,480B) 0x11D889: push (vector.hpp:86)
+| ->80.87% (13,844,480B) 0x11D889: Relation::loadRelation(char const*) (relation.cpp:64)
+|   ->80.87% (13,844,480B) 0x11DB31: Relation::Relation(char const*) (relation.cpp:76)
+|     ->80.87% (13,844,480B) 0x11C508: Utils::readRelations(std::istream&, Vector<Relation>&) (utils.cpp:89)
+|       ->80.87% (13,844,480B) 0x10EDF0: main (main.cpp:31)
+|         
+->06.89% (1,179,416B) in 216 places, all below massif's threshold (1.00%)
+| 
+->04.81% (822,672B) 0x1195DA: operator() (partitionmanager.cpp:277)
+| ->04.81% (822,672B) 0x1195DA: jsch::JobSpecification<PartitionManager::Reorder(unsigned int, jsch::JobScheduler&, unsigned long)::{lambda()
+|   ->04.81% (822,672B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|     ->04.81% (822,672B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|       ->04.81% (822,672B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|         ->04.81% (822,672B) 0x4FA6608: start_thread (pthread_create.c:477)
+|           ->04.81% (822,672B) 0x50E0162: clone (clone.S:95)
+|             
+->04.59% (786,432B) 0x11F5EB: push (vector.hpp:86)
+| ->04.59% (786,432B) 0x11F5EB: Filter::FilterConstant(Column&, FilterInfo::Comparison, int) (filtering.cpp:30)
+|   ->04.59% (786,432B) 0x11EF9B: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:424)
+|     ->04.59% (786,432B) 0x112274: operator() (main.cpp:90)
+|       ->04.59% (786,432B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->04.59% (786,432B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->04.59% (786,432B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->04.59% (786,432B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->04.59% (786,432B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->04.59% (786,432B) 0x50E0162: clone (clone.S:95)
+|                   
+->01.45% (248,064B) 0x112666: Vector (vector.hpp:67)
+| ->01.45% (248,064B) 0x112666: Vector<Vector<unsigned long> >::Vector() (vector.hpp:67)
+|   ->01.45% (248,064B) in 2 places, all below massif's threshold (1.00%)
+|     
+->01.10% (188,032B) 0x122319: Column::Column(unsigned int) (column.cpp:28)
+  ->01.10% (188,032B) 0x1202EC: Result::GetColumn(int, int) (result.cpp:74)
+    ->01.08% (184,312B) 0x11F2F3: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:512)
+    | ->01.08% (184,312B) 0x112274: operator() (main.cpp:90)
+    |   ->01.08% (184,312B) 0x112274: jsch::JobSpecification<main::{lambda()
+    |     ->01.08% (184,312B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+    |       ->01.08% (184,312B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+    |         ->01.08% (184,312B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+    |           ->01.08% (184,312B) 0x4FA6608: start_thread (pthread_create.c:477)
+    |             ->01.08% (184,312B) 0x50E0162: clone (clone.S:95)
+    |               
+    ->00.02% (3,720B) in 1+ places, all below ms_print's threshold (01.00%)
+    
+--------------------------------------------------------------------------------
+  n        time(i)         total(B)   useful-heap(B) extra-heap(B)    stacks(B)
+--------------------------------------------------------------------------------
+ 46    447,964,437       17,352,576       17,305,784        46,792            0
+ 47    455,210,419       17,486,816       17,442,576        44,240            0
+ 48    468,061,152       18,230,176       18,189,776        40,400            0
+ 49    476,108,603       19,758,384       19,722,296        36,088            0
+99.82% (19,722,296B) (heap allocation functions) malloc/new/new[], --alloc-fns, etc.
+->70.07% (13,844,480B) 0x11D889: push (vector.hpp:86)
+| ->70.07% (13,844,480B) 0x11D889: Relation::loadRelation(char const*) (relation.cpp:64)
+|   ->70.07% (13,844,480B) 0x11DB31: Relation::Relation(char const*) (relation.cpp:76)
+|     ->70.07% (13,844,480B) 0x11C508: Utils::readRelations(std::istream&, Vector<Relation>&) (utils.cpp:89)
+|       ->70.07% (13,844,480B) 0x10EDF0: main (main.cpp:31)
+|         
+->06.63% (1,310,720B) 0x12136F: push (vector.hpp:102)
+| ->06.63% (1,310,720B) 0x12136F: Result::SetJoint(int, int, Joint*) (result.cpp:232)
+|   ->06.63% (1,310,720B) 0x11F247: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:523)
+|     ->06.63% (1,310,720B) 0x112274: operator() (main.cpp:90)
+|       ->06.63% (1,310,720B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->06.63% (1,310,720B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->06.63% (1,310,720B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->06.63% (1,310,720B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->06.63% (1,310,720B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->06.63% (1,310,720B) 0x50E0162: clone (clone.S:95)
+|                   
+->04.16% (822,672B) 0x1195DA: operator() (partitionmanager.cpp:277)
+| ->04.16% (822,672B) 0x1195DA: jsch::JobSpecification<PartitionManager::Reorder(unsigned int, jsch::JobScheduler&, unsigned long)::{lambda()
+|   ->04.16% (822,672B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|     ->04.16% (822,672B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|       ->04.16% (822,672B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|         ->04.16% (822,672B) 0x4FA6608: start_thread (pthread_create.c:477)
+|           ->04.16% (822,672B) 0x50E0162: clone (clone.S:95)
+|             
+->04.16% (821,728B) in 214 places, all below massif's threshold (1.00%)
+| 
+->03.98% (786,432B) 0x11F5EB: push (vector.hpp:86)
+| ->03.98% (786,432B) 0x11F5EB: Filter::FilterConstant(Column&, FilterInfo::Comparison, int) (filtering.cpp:30)
+|   ->03.98% (786,432B) 0x11EF9B: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:424)
+|     ->03.98% (786,432B) 0x112274: operator() (main.cpp:90)
+|       ->03.98% (786,432B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->03.98% (786,432B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->03.98% (786,432B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->03.98% (786,432B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->03.98% (786,432B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->03.98% (786,432B) 0x50E0162: clone (clone.S:95)
+|                   
+->03.41% (673,792B) 0x120C6B: push (vector.hpp:102)
+| ->03.41% (673,792B) 0x120C6B: Result::SetJoint(int, int, Joint*) (result.cpp:147)
+|   ->03.41% (673,792B) 0x11F247: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:523)
+|     ->03.41% (673,792B) 0x112274: operator() (main.cpp:90)
+|       ->03.41% (673,792B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->03.41% (673,792B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->03.41% (673,792B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->03.41% (673,792B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->03.41% (673,792B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->03.41% (673,792B) 0x50E0162: clone (clone.S:95)
+|                   
+->03.33% (657,408B) 0x120B5B: push (vector.hpp:102)
+| ->03.33% (657,408B) 0x120B5B: Result::SetJoint(int, int, Joint*) (result.cpp:146)
+|   ->03.33% (657,408B) 0x11F247: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:523)
+|     ->03.33% (657,408B) 0x112274: operator() (main.cpp:90)
+|       ->03.33% (657,408B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->03.33% (657,408B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->03.33% (657,408B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->03.33% (657,408B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->03.33% (657,408B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->03.33% (657,408B) 0x50E0162: clone (clone.S:95)
+|                   
+->02.82% (557,000B) 0x1254BD: Vector (vector.hpp:74)
+| ->02.82% (557,000B) 0x1254BD: operator() (joint.cpp:122)
+|   ->02.82% (557,000B) 0x1254BD: jsch::JobSpecification<Joint::Joint(Column*, Column*, jsch::JobScheduler&, unsigned long)::{lambda()
+|     ->02.82% (557,000B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|       ->02.82% (557,000B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|         ->02.82% (557,000B) 0x4FA6608: start_thread (pthread_create.c:477)
+|           ->02.82% (557,000B) 0x50E0162: clone (clone.S:95)
+|             
+->01.26% (248,064B) 0x112666: Vector (vector.hpp:67)
+  ->01.26% (248,064B) 0x112666: Vector<Vector<unsigned long> >::Vector() (vector.hpp:67)
+    ->01.26% (248,064B) in 2 places, all below massif's threshold (1.00%)
+      
+--------------------------------------------------------------------------------
+  n        time(i)         total(B)   useful-heap(B) extra-heap(B)    stacks(B)
+--------------------------------------------------------------------------------
+ 50    482,253,901       18,105,168       18,053,720        51,448            0
+ 51    488,396,267       18,127,104       18,080,136        46,968            0
+ 52    494,585,739       18,405,080       18,364,064        41,016            0
+ 53    500,729,257       18,263,120       18,205,904        57,216            0
+ 54    506,901,498       18,230,232       18,177,560        52,672            0
+ 55    513,050,592       18,100,408       18,057,336        43,072            0
+ 56    519,195,683       18,160,376       18,120,104        40,272            0
+ 57    525,338,526       18,128,456       18,093,016        35,440            0
+ 58    531,481,243       18,171,112       18,139,904        31,208            0
+ 59    537,623,962       18,121,584       18,087,208        34,376            0
+99.81% (18,087,208B) (heap allocation functions) malloc/new/new[], --alloc-fns, etc.
+->76.40% (13,844,480B) 0x11D889: push (vector.hpp:86)
+| ->76.40% (13,844,480B) 0x11D889: Relation::loadRelation(char const*) (relation.cpp:64)
+|   ->76.40% (13,844,480B) 0x11DB31: Relation::Relation(char const*) (relation.cpp:76)
+|     ->76.40% (13,844,480B) 0x11C508: Utils::readRelations(std::istream&, Vector<Relation>&) (utils.cpp:89)
+|       ->76.40% (13,844,480B) 0x10EDF0: main (main.cpp:31)
+|         
+->05.79% (1,048,576B) 0x12136F: push (vector.hpp:102)
+| ->05.79% (1,048,576B) 0x12136F: Result::SetJoint(int, int, Joint*) (result.cpp:232)
+|   ->05.79% (1,048,576B) 0x11F247: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:523)
+|     ->05.79% (1,048,576B) 0x112274: operator() (main.cpp:90)
+|       ->05.79% (1,048,576B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->05.79% (1,048,576B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->05.79% (1,048,576B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->05.79% (1,048,576B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->05.79% (1,048,576B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->05.79% (1,048,576B) 0x50E0162: clone (clone.S:95)
+|                   
+->04.35% (788,480B) 0x120C6B: push (vector.hpp:102)
+| ->04.35% (788,480B) 0x120C6B: Result::SetJoint(int, int, Joint*) (result.cpp:147)
+|   ->04.35% (788,480B) 0x11F247: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:523)
+|     ->04.35% (788,480B) 0x112274: operator() (main.cpp:90)
+|       ->04.35% (788,480B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->04.35% (788,480B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->04.35% (788,480B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->04.35% (788,480B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->04.35% (788,480B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->04.35% (788,480B) 0x50E0162: clone (clone.S:95)
+|                   
+->04.04% (732,664B) in 214 places, all below massif's threshold (1.00%)
+| 
+->02.89% (524,288B) 0x11F5EB: push (vector.hpp:86)
+| ->02.89% (524,288B) 0x11F5EB: Filter::FilterConstant(Column&, FilterInfo::Comparison, int) (filtering.cpp:30)
+|   ->02.89% (524,288B) 0x11EF9B: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:424)
+|     ->02.89% (524,288B) 0x112274: operator() (main.cpp:90)
+|       ->02.89% (524,288B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->02.89% (524,288B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->02.89% (524,288B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->02.89% (524,288B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->02.89% (524,288B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->02.89% (524,288B) 0x50E0162: clone (clone.S:95)
+|                   
+->02.43% (439,656B) 0x1195DA: operator() (partitionmanager.cpp:277)
+| ->02.43% (439,656B) 0x1195DA: jsch::JobSpecification<PartitionManager::Reorder(unsigned int, jsch::JobScheduler&, unsigned long)::{lambda()
+|   ->02.43% (439,656B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|     ->02.43% (439,656B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|       ->02.43% (439,656B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|         ->02.43% (439,656B) 0x4FA6608: start_thread (pthread_create.c:477)
+|           ->02.43% (439,656B) 0x50E0162: clone (clone.S:95)
+|             
+->01.46% (264,192B) 0x120B5B: push (vector.hpp:102)
+| ->01.46% (264,192B) 0x120B5B: Result::SetJoint(int, int, Joint*) (result.cpp:146)
+|   ->01.46% (264,192B) 0x11F247: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:523)
+|     ->01.46% (264,192B) 0x112274: operator() (main.cpp:90)
+|       ->01.46% (264,192B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->01.46% (264,192B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->01.46% (264,192B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->01.46% (264,192B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->01.46% (264,192B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->01.46% (264,192B) 0x50E0162: clone (clone.S:95)
+|                   
+->01.37% (248,064B) 0x112666: Vector (vector.hpp:67)
+| ->01.37% (248,064B) 0x112666: Vector<Vector<unsigned long> >::Vector() (vector.hpp:67)
+|   ->01.37% (248,064B) in 2 places, all below massif's threshold (1.00%)
+|     
+->01.09% (196,808B) 0x122319: Column::Column(unsigned int) (column.cpp:28)
+  ->01.09% (196,808B) 0x1202EC: Result::GetColumn(int, int) (result.cpp:74)
+    ->01.02% (184,312B) 0x11F2E1: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:511)
+    | ->01.02% (184,312B) 0x112274: operator() (main.cpp:90)
+    |   ->01.02% (184,312B) 0x112274: jsch::JobSpecification<main::{lambda()
+    |     ->01.02% (184,312B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+    |       ->01.02% (184,312B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+    |         ->01.02% (184,312B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+    |           ->01.02% (184,312B) 0x4FA6608: start_thread (pthread_create.c:477)
+    |             ->01.02% (184,312B) 0x50E0162: clone (clone.S:95)
+    |               
+    ->00.07% (12,496B) in 1+ places, all below ms_print's threshold (01.00%)
+    
+--------------------------------------------------------------------------------
+  n        time(i)         total(B)   useful-heap(B) extra-heap(B)    stacks(B)
+--------------------------------------------------------------------------------
+ 60    543,774,854       18,173,536       18,143,176        30,360            0
+ 61    549,940,278       18,310,832       18,285,032        25,800            0
+ 62    556,138,116       18,492,232       18,470,504        21,728            0
+ 63    562,683,020       18,604,272       18,565,808        38,464            0
+ 64    568,889,436       18,282,856       18,250,424        32,432            0
+ 65    575,038,733       18,370,328       18,339,648        30,680            0
+ 66    581,182,272       18,446,544       18,420,280        26,264            0
+ 67    587,362,293       18,452,448       18,428,640        23,808            0
+ 68    593,513,178       18,348,208       18,323,680        24,528            0
+ 69    599,655,833       18,004,656       17,974,976        29,680            0
+99.84% (17,974,976B) (heap allocation functions) malloc/new/new[], --alloc-fns, etc.
+->76.89% (13,844,480B) 0x11D889: push (vector.hpp:86)
+| ->76.89% (13,844,480B) 0x11D889: Relation::loadRelation(char const*) (relation.cpp:64)
+|   ->76.89% (13,844,480B) 0x11DB31: Relation::Relation(char const*) (relation.cpp:76)
+|     ->76.89% (13,844,480B) 0x11C508: Utils::readRelations(std::istream&, Vector<Relation>&) (utils.cpp:89)
+|       ->76.89% (13,844,480B) 0x10EDF0: main (main.cpp:31)
+|         
+->09.10% (1,638,400B) 0x12136F: push (vector.hpp:102)
+| ->09.10% (1,638,400B) 0x12136F: Result::SetJoint(int, int, Joint*) (result.cpp:232)
+|   ->09.10% (1,638,400B) 0x11F247: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:523)
+|     ->09.10% (1,638,400B) 0x112274: operator() (main.cpp:90)
+|       ->09.10% (1,638,400B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->09.10% (1,638,400B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->09.10% (1,638,400B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->09.10% (1,638,400B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->09.10% (1,638,400B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->09.10% (1,638,400B) 0x50E0162: clone (clone.S:95)
+|                   
+->06.01% (1,081,344B) 0x120C6B: push (vector.hpp:102)
+| ->06.01% (1,081,344B) 0x120C6B: Result::SetJoint(int, int, Joint*) (result.cpp:147)
+|   ->06.01% (1,081,344B) 0x11F247: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:523)
+|     ->06.01% (1,081,344B) 0x112274: operator() (main.cpp:90)
+|       ->06.01% (1,081,344B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->06.01% (1,081,344B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->06.01% (1,081,344B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->06.01% (1,081,344B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->06.01% (1,081,344B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->06.01% (1,081,344B) 0x50E0162: clone (clone.S:95)
+|                   
+->02.45% (441,592B) in 215 places, all below massif's threshold (1.00%)
+| 
+->01.46% (262,144B) 0x11F5EB: push (vector.hpp:86)
+| ->01.46% (262,144B) 0x11F5EB: Filter::FilterConstant(Column&, FilterInfo::Comparison, int) (filtering.cpp:30)
+|   ->01.46% (262,144B) 0x11EF9B: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:424)
+|     ->01.46% (262,144B) 0x112274: operator() (main.cpp:90)
+|       ->01.46% (262,144B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->01.46% (262,144B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->01.46% (262,144B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->01.46% (262,144B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->01.46% (262,144B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->01.46% (262,144B) 0x50E0162: clone (clone.S:95)
+|                   
+->01.46% (262,144B) 0x120B5B: push (vector.hpp:102)
+| ->01.46% (262,144B) 0x120B5B: Result::SetJoint(int, int, Joint*) (result.cpp:146)
+|   ->01.46% (262,144B) 0x11F247: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:523)
+|     ->01.46% (262,144B) 0x112274: operator() (main.cpp:90)
+|       ->01.46% (262,144B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->01.46% (262,144B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->01.46% (262,144B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->01.46% (262,144B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->01.46% (262,144B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->01.46% (262,144B) 0x50E0162: clone (clone.S:95)
+|                   
+->01.38% (248,064B) 0x112666: Vector (vector.hpp:67)
+| ->01.38% (248,064B) 0x112666: Vector<Vector<unsigned long> >::Vector() (vector.hpp:67)
+|   ->01.38% (248,064B) in 2 places, all below massif's threshold (1.00%)
+|     
+->01.09% (196,808B) 0x1195DA: operator() (partitionmanager.cpp:277)
+  ->01.09% (196,808B) 0x1195DA: jsch::JobSpecification<PartitionManager::Reorder(unsigned int, jsch::JobScheduler&, unsigned long)::{lambda()
+    ->01.09% (196,808B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+      ->01.09% (196,808B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+        ->01.09% (196,808B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+          ->01.09% (196,808B) 0x4FA6608: start_thread (pthread_create.c:477)
+            ->01.09% (196,808B) 0x50E0162: clone (clone.S:95)
+              
+--------------------------------------------------------------------------------
+  n        time(i)         total(B)   useful-heap(B) extra-heap(B)    stacks(B)
+--------------------------------------------------------------------------------
+ 70    605,799,727       18,063,792       18,037,992        25,800            0
+ 71    611,947,127       18,113,744       18,092,008        21,736            0
+ 72    618,091,154       18,482,952       18,467,240        15,712            0
+ 73    624,236,546       18,468,864       18,452,784        16,080            0
+ 74    630,493,782       18,616,464       18,600,488        15,976            0
+ 75    636,699,263       18,629,632       18,612,720        16,912            0
+ 76    642,842,476       18,459,456       18,428,600        30,856            0
+ 77    648,994,883       18,544,544       18,515,200        29,344            0
+ 78    655,141,382       18,664,440       18,636,696        27,744            0
+ 79    661,324,626       18,736,632       18,709,944        26,688            0
+99.86% (18,709,944B) (heap allocation functions) malloc/new/new[], --alloc-fns, etc.
+->73.89% (13,844,480B) 0x11D889: push (vector.hpp:86)
+| ->73.89% (13,844,480B) 0x11D889: Relation::loadRelation(char const*) (relation.cpp:64)
+|   ->73.89% (13,844,480B) 0x11DB31: Relation::Relation(char const*) (relation.cpp:76)
+|     ->73.89% (13,844,480B) 0x11C508: Utils::readRelations(std::istream&, Vector<Relation>&) (utils.cpp:89)
+|       ->73.89% (13,844,480B) 0x10EDF0: main (main.cpp:31)
+|         
+->10.14% (1,900,544B) 0x12136F: push (vector.hpp:102)
+| ->10.14% (1,900,544B) 0x12136F: Result::SetJoint(int, int, Joint*) (result.cpp:232)
+|   ->10.14% (1,900,544B) 0x11F247: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:523)
+|     ->10.14% (1,900,544B) 0x112274: operator() (main.cpp:90)
+|       ->10.14% (1,900,544B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->10.14% (1,900,544B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->10.14% (1,900,544B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->10.14% (1,900,544B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->10.14% (1,900,544B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->10.14% (1,900,544B) 0x50E0162: clone (clone.S:95)
+|                   
+->05.77% (1,081,344B) 0x120C6B: push (vector.hpp:102)
+| ->05.77% (1,081,344B) 0x120C6B: Result::SetJoint(int, int, Joint*) (result.cpp:147)
+|   ->05.77% (1,081,344B) 0x11F247: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:523)
+|     ->05.77% (1,081,344B) 0x112274: operator() (main.cpp:90)
+|       ->05.77% (1,081,344B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->05.77% (1,081,344B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->05.77% (1,081,344B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->05.77% (1,081,344B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->05.77% (1,081,344B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->05.77% (1,081,344B) 0x50E0162: clone (clone.S:95)
+|                   
+->02.76% (516,560B) 0x1195DA: operator() (partitionmanager.cpp:277)
+| ->02.76% (516,560B) 0x1195DA: jsch::JobSpecification<PartitionManager::Reorder(unsigned int, jsch::JobScheduler&, unsigned long)::{lambda()
+|   ->02.76% (516,560B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|     ->02.76% (516,560B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|       ->02.76% (516,560B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|         ->02.76% (516,560B) 0x4FA6608: start_thread (pthread_create.c:477)
+|           ->02.76% (516,560B) 0x50E0162: clone (clone.S:95)
+|             
+->02.75% (515,152B) in 215 places, all below massif's threshold (1.00%)
+| 
+->01.82% (341,656B) 0x126737: Vector<Tuple>::push(Tuple const&) (vector.hpp:86)
+| ->01.81% (338,560B) 0x125FE0: operator() (joint.cpp:107)
+| | ->01.81% (338,560B) 0x125FE0: jsch::JobSpecification<Joint::Joint(Column*, Column*, jsch::JobScheduler&, unsigned long)::{lambda()
+| |   ->01.81% (338,560B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+| |     ->01.81% (338,560B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+| |       ->01.81% (338,560B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+| |         ->01.81% (338,560B) 0x4FA6608: start_thread (pthread_create.c:477)
+| |           ->01.81% (338,560B) 0x50E0162: clone (clone.S:95)
+| |             
+| ->00.02% (3,096B) in 1+ places, all below ms_print's threshold (01.00%)
+| 
+->01.40% (262,144B) 0x11F5EB: push (vector.hpp:86)
+| ->01.40% (262,144B) 0x11F5EB: Filter::FilterConstant(Column&, FilterInfo::Comparison, int) (filtering.cpp:30)
+|   ->01.40% (262,144B) 0x11EF9B: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:424)
+|     ->01.40% (262,144B) 0x112274: operator() (main.cpp:90)
+|       ->01.40% (262,144B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->01.40% (262,144B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->01.40% (262,144B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->01.40% (262,144B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->01.40% (262,144B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->01.40% (262,144B) 0x50E0162: clone (clone.S:95)
+|                   
+->01.32% (248,064B) 0x112666: Vector (vector.hpp:67)
+  ->01.32% (248,064B) 0x112666: Vector<Vector<unsigned long> >::Vector() (vector.hpp:67)
+    ->01.32% (248,064B) in 2 places, all below massif's threshold (1.00%)
+      
+--------------------------------------------------------------------------------
+  n        time(i)         total(B)   useful-heap(B) extra-heap(B)    stacks(B)
+--------------------------------------------------------------------------------
+ 80    667,505,355       18,846,832       18,821,128        25,704            0
+ 81    673,682,224       18,949,640       18,925,304        24,336            0
+ 82    679,828,174       19,042,824       19,019,672        23,152            0
+ 83    685,974,254       19,128,608       19,106,840        21,768            0
+ 84    692,117,574       19,223,696       19,202,960        20,736            0
+ 85    698,402,690       19,184,744       19,169,032        15,712            0
+ 86    701,749,567       19,971,176       19,955,464        15,712            0
+99.92% (19,955,464B) (heap allocation functions) malloc/new/new[], --alloc-fns, etc.
+->69.32% (13,844,480B) 0x11D889: push (vector.hpp:86)
+| ->69.32% (13,844,480B) 0x11D889: Relation::loadRelation(char const*) (relation.cpp:64)
+|   ->69.32% (13,844,480B) 0x11DB31: Relation::Relation(char const*) (relation.cpp:76)
+|     ->69.32% (13,844,480B) 0x11C508: Utils::readRelations(std::istream&, Vector<Relation>&) (utils.cpp:89)
+|       ->69.32% (13,844,480B) 0x10EDF0: main (main.cpp:31)
+|         
+->09.52% (1,900,544B) 0x12136F: push (vector.hpp:102)
+| ->09.52% (1,900,544B) 0x12136F: Result::SetJoint(int, int, Joint*) (result.cpp:232)
+|   ->09.52% (1,900,544B) 0x11F247: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:523)
+|     ->09.52% (1,900,544B) 0x112274: operator() (main.cpp:90)
+|       ->09.52% (1,900,544B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->09.52% (1,900,544B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->09.52% (1,900,544B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->09.52% (1,900,544B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->09.52% (1,900,544B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->09.52% (1,900,544B) 0x50E0162: clone (clone.S:95)
+|                   
+->06.73% (1,343,488B) 0x120C6B: push (vector.hpp:102)
+| ->06.73% (1,343,488B) 0x120C6B: Result::SetJoint(int, int, Joint*) (result.cpp:147)
+|   ->06.73% (1,343,488B) 0x11F247: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:523)
+|     ->06.73% (1,343,488B) 0x112274: operator() (main.cpp:90)
+|       ->06.73% (1,343,488B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->06.73% (1,343,488B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->06.73% (1,343,488B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->06.73% (1,343,488B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->06.73% (1,343,488B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->06.73% (1,343,488B) 0x50E0162: clone (clone.S:95)
+|                   
+->04.59% (917,504B) 0x120B5B: push (vector.hpp:102)
+| ->04.59% (917,504B) 0x120B5B: Result::SetJoint(int, int, Joint*) (result.cpp:146)
+|   ->04.59% (917,504B) 0x11F247: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:523)
+|     ->04.59% (917,504B) 0x112274: operator() (main.cpp:90)
+|       ->04.59% (917,504B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->04.59% (917,504B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->04.59% (917,504B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->04.59% (917,504B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->04.59% (917,504B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->04.59% (917,504B) 0x50E0162: clone (clone.S:95)
+|                   
+->03.21% (640,096B) 0x1254BD: Vector (vector.hpp:74)
+| ->03.21% (640,096B) 0x1254BD: operator() (joint.cpp:122)
+|   ->03.21% (640,096B) 0x1254BD: jsch::JobSpecification<Joint::Joint(Column*, Column*, jsch::JobScheduler&, unsigned long)::{lambda()
+|     ->03.21% (640,096B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|       ->03.21% (640,096B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|         ->03.21% (640,096B) 0x4FA6608: start_thread (pthread_create.c:477)
+|           ->03.21% (640,096B) 0x50E0162: clone (clone.S:95)
+|             
+->02.59% (516,560B) 0x1195DA: operator() (partitionmanager.cpp:277)
+| ->02.59% (516,560B) 0x1195DA: jsch::JobSpecification<PartitionManager::Reorder(unsigned int, jsch::JobScheduler&, unsigned long)::{lambda()
+|   ->02.59% (516,560B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|     ->02.59% (516,560B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|       ->02.59% (516,560B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|         ->02.59% (516,560B) 0x4FA6608: start_thread (pthread_create.c:477)
+|           ->02.59% (516,560B) 0x50E0162: clone (clone.S:95)
+|             
+->01.41% (282,584B) in 214 places, all below massif's threshold (1.00%)
+| 
+->01.31% (262,144B) 0x11F5EB: push (vector.hpp:86)
+| ->01.31% (262,144B) 0x11F5EB: Filter::FilterConstant(Column&, FilterInfo::Comparison, int) (filtering.cpp:30)
+|   ->01.31% (262,144B) 0x11EF9B: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:424)
+|     ->01.31% (262,144B) 0x112274: operator() (main.cpp:90)
+|       ->01.31% (262,144B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->01.31% (262,144B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->01.31% (262,144B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->01.31% (262,144B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->01.31% (262,144B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->01.31% (262,144B) 0x50E0162: clone (clone.S:95)
+|                   
+->01.24% (248,064B) 0x112666: Vector (vector.hpp:67)
+  ->01.24% (248,064B) 0x112666: Vector<Vector<unsigned long> >::Vector() (vector.hpp:67)
+    ->01.24% (248,064B) in 2 places, all below massif's threshold (1.00%)
+      
+--------------------------------------------------------------------------------
+  n        time(i)         total(B)   useful-heap(B) extra-heap(B)    stacks(B)
+--------------------------------------------------------------------------------
+ 87    701,790,644       20,233,320       20,217,608        15,712            0
+99.92% (20,217,608B) (heap allocation functions) malloc/new/new[], --alloc-fns, etc.
+->68.42% (13,844,480B) 0x11D889: push (vector.hpp:86)
+| ->68.42% (13,844,480B) 0x11D889: Relation::loadRelation(char const*) (relation.cpp:64)
+|   ->68.42% (13,844,480B) 0x11DB31: Relation::Relation(char const*) (relation.cpp:76)
+|     ->68.42% (13,844,480B) 0x11C508: Utils::readRelations(std::istream&, Vector<Relation>&) (utils.cpp:89)
+|       ->68.42% (13,844,480B) 0x10EDF0: main (main.cpp:31)
+|         
+->09.39% (1,900,544B) 0x12136F: push (vector.hpp:102)
+| ->09.39% (1,900,544B) 0x12136F: Result::SetJoint(int, int, Joint*) (result.cpp:232)
+|   ->09.39% (1,900,544B) 0x11F247: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:523)
+|     ->09.39% (1,900,544B) 0x112274: operator() (main.cpp:90)
+|       ->09.39% (1,900,544B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->09.39% (1,900,544B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->09.39% (1,900,544B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->09.39% (1,900,544B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->09.39% (1,900,544B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->09.39% (1,900,544B) 0x50E0162: clone (clone.S:95)
+|                   
+->09.23% (1,867,776B) 0x120C6B: push (vector.hpp:102)
+| ->09.23% (1,867,776B) 0x120C6B: Result::SetJoint(int, int, Joint*) (result.cpp:147)
+|   ->09.23% (1,867,776B) 0x11F247: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:523)
+|     ->09.23% (1,867,776B) 0x112274: operator() (main.cpp:90)
+|       ->09.23% (1,867,776B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->09.23% (1,867,776B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->09.23% (1,867,776B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->09.23% (1,867,776B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->09.23% (1,867,776B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->09.23% (1,867,776B) 0x50E0162: clone (clone.S:95)
+|                   
+->03.24% (655,360B) 0x120B5B: push (vector.hpp:102)
+| ->03.24% (655,360B) 0x120B5B: Result::SetJoint(int, int, Joint*) (result.cpp:146)
+|   ->03.24% (655,360B) 0x11F247: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:523)
+|     ->03.24% (655,360B) 0x112274: operator() (main.cpp:90)
+|       ->03.24% (655,360B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->03.24% (655,360B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->03.24% (655,360B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->03.24% (655,360B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->03.24% (655,360B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->03.24% (655,360B) 0x50E0162: clone (clone.S:95)
+|                   
+->03.16% (640,096B) 0x1254BD: Vector (vector.hpp:74)
+| ->03.16% (640,096B) 0x1254BD: operator() (joint.cpp:122)
+|   ->03.16% (640,096B) 0x1254BD: jsch::JobSpecification<Joint::Joint(Column*, Column*, jsch::JobScheduler&, unsigned long)::{lambda()
+|     ->03.16% (640,096B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|       ->03.16% (640,096B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|         ->03.16% (640,096B) 0x4FA6608: start_thread (pthread_create.c:477)
+|           ->03.16% (640,096B) 0x50E0162: clone (clone.S:95)
+|             
+->02.55% (516,560B) 0x1195DA: operator() (partitionmanager.cpp:277)
+| ->02.55% (516,560B) 0x1195DA: jsch::JobSpecification<PartitionManager::Reorder(unsigned int, jsch::JobScheduler&, unsigned long)::{lambda()
+|   ->02.55% (516,560B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|     ->02.55% (516,560B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|       ->02.55% (516,560B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|         ->02.55% (516,560B) 0x4FA6608: start_thread (pthread_create.c:477)
+|           ->02.55% (516,560B) 0x50E0162: clone (clone.S:95)
+|             
+->01.40% (282,584B) in 214 places, all below massif's threshold (1.00%)
+| 
+->01.30% (262,144B) 0x11F5EB: push (vector.hpp:86)
+| ->01.30% (262,144B) 0x11F5EB: Filter::FilterConstant(Column&, FilterInfo::Comparison, int) (filtering.cpp:30)
+|   ->01.30% (262,144B) 0x11EF9B: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:424)
+|     ->01.30% (262,144B) 0x112274: operator() (main.cpp:90)
+|       ->01.30% (262,144B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->01.30% (262,144B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->01.30% (262,144B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->01.30% (262,144B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->01.30% (262,144B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->01.30% (262,144B) 0x50E0162: clone (clone.S:95)
+|                   
+->01.23% (248,064B) 0x112666: Vector (vector.hpp:67)
+  ->01.23% (248,064B) 0x112666: Vector<Vector<unsigned long> >::Vector() (vector.hpp:67)
+    ->01.23% (248,064B) in 2 places, all below massif's threshold (1.00%)
+      
+--------------------------------------------------------------------------------
+  n        time(i)         total(B)   useful-heap(B) extra-heap(B)    stacks(B)
+--------------------------------------------------------------------------------
+ 88    703,943,343       20,757,640       20,741,912        15,728            0
+99.92% (20,741,912B) (heap allocation functions) malloc/new/new[], --alloc-fns, etc.
+->66.70% (13,844,480B) 0x11D889: push (vector.hpp:86)
+| ->66.70% (13,844,480B) 0x11D889: Relation::loadRelation(char const*) (relation.cpp:64)
+|   ->66.70% (13,844,480B) 0x11DB31: Relation::Relation(char const*) (relation.cpp:76)
+|     ->66.70% (13,844,480B) 0x11C508: Utils::readRelations(std::istream&, Vector<Relation>&) (utils.cpp:89)
+|       ->66.70% (13,844,480B) 0x10EDF0: main (main.cpp:31)
+|         
+->12.94% (2,686,976B) 0x12136F: push (vector.hpp:102)
+| ->12.94% (2,686,976B) 0x12136F: Result::SetJoint(int, int, Joint*) (result.cpp:232)
+|   ->12.94% (2,686,976B) 0x11F247: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:523)
+|     ->12.94% (2,686,976B) 0x112274: operator() (main.cpp:90)
+|       ->12.94% (2,686,976B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->12.94% (2,686,976B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->12.94% (2,686,976B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->12.94% (2,686,976B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->12.94% (2,686,976B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->12.94% (2,686,976B) 0x50E0162: clone (clone.S:95)
+|                   
+->07.74% (1,605,632B) 0x120C6B: push (vector.hpp:102)
+| ->07.74% (1,605,632B) 0x120C6B: Result::SetJoint(int, int, Joint*) (result.cpp:147)
+|   ->07.74% (1,605,632B) 0x11F247: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:523)
+|     ->07.74% (1,605,632B) 0x112274: operator() (main.cpp:90)
+|       ->07.74% (1,605,632B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->07.74% (1,605,632B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->07.74% (1,605,632B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->07.74% (1,605,632B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->07.74% (1,605,632B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->07.74% (1,605,632B) 0x50E0162: clone (clone.S:95)
+|                   
+->03.16% (655,360B) 0x120B5B: push (vector.hpp:102)
+| ->03.16% (655,360B) 0x120B5B: Result::SetJoint(int, int, Joint*) (result.cpp:146)
+|   ->03.16% (655,360B) 0x11F247: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:523)
+|     ->03.16% (655,360B) 0x112274: operator() (main.cpp:90)
+|       ->03.16% (655,360B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->03.16% (655,360B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->03.16% (655,360B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->03.16% (655,360B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->03.16% (655,360B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->03.16% (655,360B) 0x50E0162: clone (clone.S:95)
+|                   
+->03.08% (640,096B) 0x1254BD: Vector (vector.hpp:74)
+| ->03.08% (640,096B) 0x1254BD: operator() (joint.cpp:122)
+|   ->03.08% (640,096B) 0x1254BD: jsch::JobSpecification<Joint::Joint(Column*, Column*, jsch::JobScheduler&, unsigned long)::{lambda()
+|     ->03.08% (640,096B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|       ->03.08% (640,096B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|         ->03.08% (640,096B) 0x4FA6608: start_thread (pthread_create.c:477)
+|           ->03.08% (640,096B) 0x50E0162: clone (clone.S:95)
+|             
+->02.49% (516,560B) 0x1195DA: operator() (partitionmanager.cpp:277)
+| ->02.49% (516,560B) 0x1195DA: jsch::JobSpecification<PartitionManager::Reorder(unsigned int, jsch::JobScheduler&, unsigned long)::{lambda()
+|   ->02.49% (516,560B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|     ->02.49% (516,560B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|       ->02.49% (516,560B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|         ->02.49% (516,560B) 0x4FA6608: start_thread (pthread_create.c:477)
+|           ->02.49% (516,560B) 0x50E0162: clone (clone.S:95)
+|             
+->01.36% (282,600B) in 214 places, all below massif's threshold (1.00%)
+| 
+->01.26% (262,144B) 0x11F5EB: push (vector.hpp:86)
+| ->01.26% (262,144B) 0x11F5EB: Filter::FilterConstant(Column&, FilterInfo::Comparison, int) (filtering.cpp:30)
+|   ->01.26% (262,144B) 0x11EF9B: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:424)
+|     ->01.26% (262,144B) 0x112274: operator() (main.cpp:90)
+|       ->01.26% (262,144B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->01.26% (262,144B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->01.26% (262,144B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->01.26% (262,144B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->01.26% (262,144B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->01.26% (262,144B) 0x50E0162: clone (clone.S:95)
+|                   
+->01.20% (248,064B) 0x112666: Vector (vector.hpp:67)
+  ->01.20% (248,064B) 0x112666: Vector<Vector<unsigned long> >::Vector() (vector.hpp:67)
+    ->01.20% (248,064B) in 2 places, all below massif's threshold (1.00%)
+      
+--------------------------------------------------------------------------------
+  n        time(i)         total(B)   useful-heap(B) extra-heap(B)    stacks(B)
+--------------------------------------------------------------------------------
+ 89    705,386,772       21,150,856       21,135,128        15,728            0
+99.93% (21,135,128B) (heap allocation functions) malloc/new/new[], --alloc-fns, etc.
+->65.46% (13,844,480B) 0x11D889: push (vector.hpp:86)
+| ->65.46% (13,844,480B) 0x11D889: Relation::loadRelation(char const*) (relation.cpp:64)
+|   ->65.46% (13,844,480B) 0x11DB31: Relation::Relation(char const*) (relation.cpp:76)
+|     ->65.46% (13,844,480B) 0x11C508: Utils::readRelations(std::istream&, Vector<Relation>&) (utils.cpp:89)
+|       ->65.46% (13,844,480B) 0x10EDF0: main (main.cpp:31)
+|         
+->14.56% (3,080,192B) 0x12136F: push (vector.hpp:102)
+| ->14.56% (3,080,192B) 0x12136F: Result::SetJoint(int, int, Joint*) (result.cpp:232)
+|   ->14.56% (3,080,192B) 0x11F247: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:523)
+|     ->14.56% (3,080,192B) 0x112274: operator() (main.cpp:90)
+|       ->14.56% (3,080,192B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->14.56% (3,080,192B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->14.56% (3,080,192B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->14.56% (3,080,192B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->14.56% (3,080,192B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->14.56% (3,080,192B) 0x50E0162: clone (clone.S:95)
+|                   
+->07.59% (1,605,632B) 0x120C6B: push (vector.hpp:102)
+| ->07.59% (1,605,632B) 0x120C6B: Result::SetJoint(int, int, Joint*) (result.cpp:147)
+|   ->07.59% (1,605,632B) 0x11F247: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:523)
+|     ->07.59% (1,605,632B) 0x112274: operator() (main.cpp:90)
+|       ->07.59% (1,605,632B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->07.59% (1,605,632B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->07.59% (1,605,632B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->07.59% (1,605,632B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->07.59% (1,605,632B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->07.59% (1,605,632B) 0x50E0162: clone (clone.S:95)
+|                   
+->03.10% (655,360B) 0x120B5B: push (vector.hpp:102)
+| ->03.10% (655,360B) 0x120B5B: Result::SetJoint(int, int, Joint*) (result.cpp:146)
+|   ->03.10% (655,360B) 0x11F247: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:523)
+|     ->03.10% (655,360B) 0x112274: operator() (main.cpp:90)
+|       ->03.10% (655,360B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->03.10% (655,360B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->03.10% (655,360B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->03.10% (655,360B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->03.10% (655,360B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->03.10% (655,360B) 0x50E0162: clone (clone.S:95)
+|                   
+->03.03% (640,096B) 0x1254BD: Vector (vector.hpp:74)
+| ->03.03% (640,096B) 0x1254BD: operator() (joint.cpp:122)
+|   ->03.03% (640,096B) 0x1254BD: jsch::JobSpecification<Joint::Joint(Column*, Column*, jsch::JobScheduler&, unsigned long)::{lambda()
+|     ->03.03% (640,096B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|       ->03.03% (640,096B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|         ->03.03% (640,096B) 0x4FA6608: start_thread (pthread_create.c:477)
+|           ->03.03% (640,096B) 0x50E0162: clone (clone.S:95)
+|             
+->02.44% (516,560B) 0x1195DA: operator() (partitionmanager.cpp:277)
+| ->02.44% (516,560B) 0x1195DA: jsch::JobSpecification<PartitionManager::Reorder(unsigned int, jsch::JobScheduler&, unsigned long)::{lambda()
+|   ->02.44% (516,560B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|     ->02.44% (516,560B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|       ->02.44% (516,560B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|         ->02.44% (516,560B) 0x4FA6608: start_thread (pthread_create.c:477)
+|           ->02.44% (516,560B) 0x50E0162: clone (clone.S:95)
+|             
+->01.34% (282,600B) in 214 places, all below massif's threshold (1.00%)
+| 
+->01.24% (262,144B) 0x11F5EB: push (vector.hpp:86)
+| ->01.24% (262,144B) 0x11F5EB: Filter::FilterConstant(Column&, FilterInfo::Comparison, int) (filtering.cpp:30)
+|   ->01.24% (262,144B) 0x11EF9B: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:424)
+|     ->01.24% (262,144B) 0x112274: operator() (main.cpp:90)
+|       ->01.24% (262,144B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->01.24% (262,144B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->01.24% (262,144B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->01.24% (262,144B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->01.24% (262,144B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->01.24% (262,144B) 0x50E0162: clone (clone.S:95)
+|                   
+->01.17% (248,064B) 0x112666: Vector (vector.hpp:67)
+  ->01.17% (248,064B) 0x112666: Vector<Vector<unsigned long> >::Vector() (vector.hpp:67)
+    ->01.17% (248,064B) in 2 places, all below massif's threshold (1.00%)
+      
+--------------------------------------------------------------------------------
+  n        time(i)         total(B)   useful-heap(B) extra-heap(B)    stacks(B)
+--------------------------------------------------------------------------------
+ 90    706,830,201       21,544,072       21,528,344        15,728            0
+99.93% (21,528,344B) (heap allocation functions) malloc/new/new[], --alloc-fns, etc.
+->64.26% (13,844,480B) 0x11D889: push (vector.hpp:86)
+| ->64.26% (13,844,480B) 0x11D889: Relation::loadRelation(char const*) (relation.cpp:64)
+|   ->64.26% (13,844,480B) 0x11DB31: Relation::Relation(char const*) (relation.cpp:76)
+|     ->64.26% (13,844,480B) 0x11C508: Utils::readRelations(std::istream&, Vector<Relation>&) (utils.cpp:89)
+|       ->64.26% (13,844,480B) 0x10EDF0: main (main.cpp:31)
+|         
+->16.12% (3,473,408B) 0x12136F: push (vector.hpp:102)
+| ->16.12% (3,473,408B) 0x12136F: Result::SetJoint(int, int, Joint*) (result.cpp:232)
+|   ->16.12% (3,473,408B) 0x11F247: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:523)
+|     ->16.12% (3,473,408B) 0x112274: operator() (main.cpp:90)
+|       ->16.12% (3,473,408B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->16.12% (3,473,408B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->16.12% (3,473,408B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->16.12% (3,473,408B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->16.12% (3,473,408B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->16.12% (3,473,408B) 0x50E0162: clone (clone.S:95)
+|                   
+->07.45% (1,605,632B) 0x120C6B: push (vector.hpp:102)
+| ->07.45% (1,605,632B) 0x120C6B: Result::SetJoint(int, int, Joint*) (result.cpp:147)
+|   ->07.45% (1,605,632B) 0x11F247: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:523)
+|     ->07.45% (1,605,632B) 0x112274: operator() (main.cpp:90)
+|       ->07.45% (1,605,632B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->07.45% (1,605,632B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->07.45% (1,605,632B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->07.45% (1,605,632B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->07.45% (1,605,632B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->07.45% (1,605,632B) 0x50E0162: clone (clone.S:95)
+|                   
+->03.04% (655,360B) 0x120B5B: push (vector.hpp:102)
+| ->03.04% (655,360B) 0x120B5B: Result::SetJoint(int, int, Joint*) (result.cpp:146)
+|   ->03.04% (655,360B) 0x11F247: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:523)
+|     ->03.04% (655,360B) 0x112274: operator() (main.cpp:90)
+|       ->03.04% (655,360B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->03.04% (655,360B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->03.04% (655,360B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->03.04% (655,360B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->03.04% (655,360B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->03.04% (655,360B) 0x50E0162: clone (clone.S:95)
+|                   
+->02.97% (640,096B) 0x1254BD: Vector (vector.hpp:74)
+| ->02.97% (640,096B) 0x1254BD: operator() (joint.cpp:122)
+|   ->02.97% (640,096B) 0x1254BD: jsch::JobSpecification<Joint::Joint(Column*, Column*, jsch::JobScheduler&, unsigned long)::{lambda()
+|     ->02.97% (640,096B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|       ->02.97% (640,096B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|         ->02.97% (640,096B) 0x4FA6608: start_thread (pthread_create.c:477)
+|           ->02.97% (640,096B) 0x50E0162: clone (clone.S:95)
+|             
+->02.40% (516,560B) 0x1195DA: operator() (partitionmanager.cpp:277)
+| ->02.40% (516,560B) 0x1195DA: jsch::JobSpecification<PartitionManager::Reorder(unsigned int, jsch::JobScheduler&, unsigned long)::{lambda()
+|   ->02.40% (516,560B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|     ->02.40% (516,560B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|       ->02.40% (516,560B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|         ->02.40% (516,560B) 0x4FA6608: start_thread (pthread_create.c:477)
+|           ->02.40% (516,560B) 0x50E0162: clone (clone.S:95)
+|             
+->01.31% (282,600B) in 214 places, all below massif's threshold (1.00%)
+| 
+->01.22% (262,144B) 0x11F5EB: push (vector.hpp:86)
+| ->01.22% (262,144B) 0x11F5EB: Filter::FilterConstant(Column&, FilterInfo::Comparison, int) (filtering.cpp:30)
+|   ->01.22% (262,144B) 0x11EF9B: OperationManager::ExecuteAndReturn(QueryInfo*, jsch::JobScheduler&, unsigned long) (operationmanager.cpp:424)
+|     ->01.22% (262,144B) 0x112274: operator() (main.cpp:90)
+|       ->01.22% (262,144B) 0x112274: jsch::JobSpecification<main::{lambda()
+|         ->01.22% (262,144B) 0x110FF3: jsch::RequiredJob::execute() (req_job.cpp:11)
+|           ->01.22% (262,144B) 0x111C60: jsch::LinkedJobWrapper::execute() (linked_job_wrapper.cpp:20)
+|             ->01.22% (262,144B) 0x111238: jsch::JobScheduler::work() (job_scheduler.cpp:19)
+|               ->01.22% (262,144B) 0x4FA6608: start_thread (pthread_create.c:477)
+|                 ->01.22% (262,144B) 0x50E0162: clone (clone.S:95)
+|                   
+->01.15% (248,064B) 0x112666: Vector (vector.hpp:67)
+  ->01.15% (248,064B) 0x112666: Vector<Vector<unsigned long> >::Vector() (vector.hpp:67)
+    ->01.15% (248,064B) in 2 places, all below massif's threshold (1.00%)
+      
+--------------------------------------------------------------------------------
+  n        time(i)         total(B)   useful-heap(B) extra-heap(B)    stacks(B)
+--------------------------------------------------------------------------------
+ 91    713,873,564       19,207,640       19,192,008        15,632            0
+ 92    722,091,878       19,207,640       19,192,008        15,632            0
+ 93    730,460,241       19,206,640       19,191,208        15,432            0
+ 94    739,903,627       19,206,640       19,191,208        15,432            0

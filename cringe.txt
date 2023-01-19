@@ -1,0 +1,2 @@
+50d49
+< Queries calculated in : 130865427 μ/s
