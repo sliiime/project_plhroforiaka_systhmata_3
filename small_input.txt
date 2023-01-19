@@ -1,3 +1,4 @@
+workloads/small/small.work
 workloads/small/r0
 workloads/small/r1
 workloads/small/r2

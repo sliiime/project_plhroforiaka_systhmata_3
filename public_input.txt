@@ -1,3 +1,4 @@
+workloads/public/public.work
 workloads/public/r0
 workloads/public/r1
 workloads/public/r2

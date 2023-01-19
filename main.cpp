@@ -23,23 +23,14 @@ int main(){
 
     Vector<Relation> relations;
 
-
-
+	//Reads batch of queries and stores them to queries vector
+    std::string workloadPath;
+    std::getline(std::cin,workloadPath);    
+    std::ifstream in(workloadPath);
 
     //Read filenames of relations from stdin
     Utils::readRelations(std::cin,relations);
     
-	//Reads batch of queries and stores them to queries vector
-    std::ifstream in("workloads/small/small.work");
-    /* 
-    std::ifstream inPublic("workloads/public/public.work");
-	Utils::readQueryBatch(inPublic,queries);
-    */
-
-    
-
-    // const size_t TOTAL_WORKERS = 50;
-    // const size_t THREADS_PER_QUERY = queries.get_size() * 3;
 
     Vector<Relation*> relationPtrs = Vector<Relation*>();
     for (uint i = 0 ; i < relations.get_size(); i++){
@@ -54,14 +45,10 @@ int main(){
     jsch::JobSequence* print = NULL;
     jsch::JobPlan* current = main;
 
+    Vector<QueryInfo> queries;
 
-    while (true){
+    while (Utils::readQueryBatch(in,queries)){
         
-
-        Vector<QueryInfo> queries;
-        bool done = !Utils::readQueryBatch(in,queries);
-
-        if (done) break;
 
         if (print != NULL){
             current = jobScheduler.makeJobPlan();
@@ -110,6 +97,8 @@ int main(){
 
         current->addDependentJob(print);
 
+        queries.clear();
+
     }
 
     auto start = chrono::high_resolution_clock::now();
@@ -119,7 +108,7 @@ int main(){
     auto end = chrono::high_resolution_clock::now();
 
     auto duration = chrono::duration_cast<chrono::microseconds>(end - start);
-    std::cout << "Time taken using JobScheduler with multithreading : " << duration.count() << std::endl;
+    std::cout << "Queries calculated in : " << duration.count() << " μ/s" << std::endl;
 
     return 0;
 
