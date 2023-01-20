@@ -1,9 +1,0 @@
-AMD® Ryzen 5 1600 six-core processor × 12 
-
-Multithreading  Optimizer     Runs      Time(μ/s)   MaxHeap(MB)  Workload
-    ✔               ✔         100        1855979      252.1       small
-    ✔               ✔          10       55759270     5838         public
-    
-    ✔               ✗         100        1867975      251.7       small
-    ✔               ✗          10       64572917     7324         public
-
